@@ -566,8 +566,17 @@ df_period["Statut_auto"] = np.where(df_period["VHR"] <= 0, "Non démarré", np.w
 # Filtres avancés
 # -----------------------------
 st.sidebar.header("Filtres")
+
+# Filtre Semestre si colonne présente
+if "Semestre" in df_period.columns:
+    semestres = sorted(df_period["Semestre"].dropna().unique().tolist())
+    selected_semestres = st.sidebar.multiselect("Semestres", semestres, default=semestres)
+else:
+    selected_semestres = None  # Pas de filtre
+
 classes = sorted(df_period["Classe"].dropna().unique().tolist())
 selected_classes = st.sidebar.multiselect("Classes", classes, default=classes)
+
 
 status_opts = ["Non démarré", "En cours", "Terminé"]
 selected_status = st.sidebar.multiselect("Statuts", status_opts, default=status_opts)
@@ -581,6 +590,11 @@ filtered = df_period[
     & df_period["Statut_auto"].isin(selected_status)
     & (df_period["VHP"] >= min_vhp)
 ].copy()
+
+# Application du filtre semestre si applicable
+if selected_semestres is not None:
+    filtered = filtered[filtered["Semestre"].isin(selected_semestres)]
+
 
 if search_matiere.strip():
     try:

@@ -21,6 +21,7 @@ import requests
 import numpy as np
 import pandas as pd
 import streamlit as st
+import plotly.express as px
 
 # PDF (ReportLab)
 from reportlab.lib.pagesizes import A4
@@ -116,7 +117,20 @@ st.markdown(
         font-size: 12px;
         font-weight: 700;
       }
-    </style>
+      /* --- Badges statut --- */
+    .badge{
+    display:inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 12px;
+    border: 1px solid #E6EAF2;
+    }
+    .badge-ok{ background:#E9F7EF; color:#145A32; }
+    .badge-warn{ background:#FEF5E7; color:#7D6608; }
+    .badge-bad{ background:#FDEDEC; color:#922B21; }
+
+</style>
 
     <div class="iaid-banner">
       <div class="title">Département IA &amp; Ingénierie des Données (IAID)</div>
@@ -248,6 +262,46 @@ def df_to_excel_bytes(sheets: Dict[str, pd.DataFrame]) -> bytes:
         for name, sheet_df in sheets.items():
             sheet_df.to_excel(writer, sheet_name=name[:31], index=False)
     return output.getvalue()
+
+def add_badges(df: pd.DataFrame) -> pd.DataFrame:
+    out = df.copy()
+    def badge(statut: str) -> str:
+        s = str(statut)
+        if s == "Terminé":
+            return '<span class="badge badge-ok">✅ Terminé</span>'
+        if s == "En cours":
+            return '<span class="badge badge-warn">🟠 En cours</span>'
+        return '<span class="badge badge-bad">🔴 Non démarré</span>'
+    out["Statut_badge"] = out["Statut_auto"].apply(badge)
+    return out
+
+def style_table(df: pd.DataFrame) -> "pd.io.formats.style.Styler":
+    stl = df.style
+
+    # Écart : rouge si négatif, vert sinon
+    if "Écart" in df.columns:
+        def ec(v):
+            try:
+                v = float(v)
+            except:
+                return ""
+            if v < 0:
+                return "background-color:#FDEDEC;color:#922B21;font-weight:800;"
+            return "background-color:#E9F7EF;color:#145A32;font-weight:800;"
+        stl = stl.applymap(ec, subset=["Écart"])
+
+    # Taux (si colonne numérique)
+    if "Taux" in df.columns and np.issubdtype(df["Taux"].dtype, np.number):
+        stl = stl.format({"Taux": "{:.0%}"}).background_gradient(subset=["Taux"], cmap="RdYlGn")
+
+    if "Taux (%)" in df.columns and np.issubdtype(df["Taux (%)"].dtype, np.number):
+        stl = stl.background_gradient(subset=["Taux (%)"], cmap="RdYlGn")
+
+    stl = stl.set_table_styles([
+        {"selector": "th", "props": [("font-weight", "800"), ("background-color", "#F0F3F8")]},
+        {"selector": "td", "props": [("border", "1px solid #E6EAF2")]},
+    ])
+    return stl
 
 # -----------------------------
 # Lecture Excel multi-feuilles
@@ -495,7 +549,6 @@ with st.sidebar:
 
 thresholds = {"taux_vert": taux_vert, "taux_orange": taux_orange, "ecart_critique": ecart_critique}
 
-thresholds = {"taux_vert": taux_vert, "taux_orange": taux_orange, "ecart_critique": ecart_critique}
 
 if file_bytes is None:
     st.info("➡️ Fournis une source (URL auto via Secrets ou Upload manuel).")
@@ -583,16 +636,39 @@ with tab_overview:
     st.write("### Avancement moyen par classe")
     g = filtered.groupby("Classe")["Taux"].mean().sort_values(ascending=False).reset_index()
     g["Taux (%)"] = (g["Taux"] * 100).round(1)
-    st.dataframe(g[["Classe", "Taux (%)"]], use_container_width=True)
-    st.bar_chart(g.set_index("Classe")["Taux (%)"])
+    st.dataframe(style_table(g[["Classe","Taux (%)"]]), use_container_width=True)
+
+    fig = px.bar(g, x="Classe", y="Taux (%)", title="Avancement moyen (%) par classe")
+    fig.update_layout(height=420, margin=dict(l=10,r=10,t=60,b=10))
+    st.plotly_chart(fig, use_container_width=True)
+
 
     st.write("### Répartition des statuts")
-    st.bar_chart(filtered["Statut_auto"].value_counts())
+    stat = filtered["Statut_auto"].value_counts().reset_index()
+    stat.columns = ["Statut", "Nombre"]
+    fig = px.pie(stat, names="Statut", values="Nombre", title="Répartition des statuts")
+    fig.update_layout(height=420, margin=dict(l=10,r=10,t=60,b=10))
+    st.plotly_chart(fig, use_container_width=True)
 
     st.write("### Top retards (Écart le plus négatif)")
-    top_retards = filtered.sort_values("Écart").head(20)[["Classe", "Matière", "VHP", "VHR", "Écart", "Taux", "Statut_auto", "Observations"]].copy()
-    top_retards["Taux"] = (top_retards["Taux"] * 100).round(1).astype(str) + "%"
-    st.dataframe(top_retards, use_container_width=True)
+    top_retards = filtered.sort_values("Écart").head(20)[
+        ["Classe", "Matière", "VHP", "VHR", "Écart", "Taux", "Statut_auto", "Observations"]
+    ].copy()
+
+    # garder Taux numérique pour la coloration
+    top_retards_badged = add_badges(top_retards)
+
+    # Affichage "pro" avec badge (HTML)
+    st.markdown(
+        top_retards_badged[["Classe","Matière","VHP","VHR","Écart","Taux","Statut_badge","Observations"]]
+        .to_html(escape=False, index=False),
+        unsafe_allow_html=True
+    )
+
+    # + une version dataframe colorée (optionnel, très utile)
+    st.dataframe(style_table(top_retards[["Classe","Matière","VHP","VHR","Écart","Taux","Statut_auto","Observations"]]),
+                use_container_width=True)
+
 
 # ====== PAR CLASSE ======
 with tab_classes:
@@ -613,9 +689,13 @@ with tab_classes:
             Retard_h=("Écart", lambda s: float(s[s < 0].sum())),
             Terminees=("Statut_auto", lambda s: int((s == "Terminé").sum())),
             Non_demarre=("Statut_auto", lambda s: int((s == "Non démarré").sum())),
-        ).reset_index()
-        synth["Taux_moy"] = (synth["Taux_moy"] * 100).round(1)
-        st.dataframe(synth.sort_values("Taux_moy", ascending=False), use_container_width=True)
+        ).reset_index()# Garde taux numérique pour gradient
+    synth_view = synth.copy()
+    # ici synth_view["Taux_moy"] est encore 0..1 (car "mean" sur Taux)
+    synth_view["Taux (%)"] = (synth_view["Taux_moy"] * 100).round(1)
+
+    show = synth_view[["Classe","Matieres","Taux (%)","VHP_total","VHR_total","Retard_h","Terminees","Non_demarre"]].copy()
+    st.dataframe(style_table(show), use_container_width=True)
 
     st.divider()
     st.write("### Détails classe A vs B (KPIs)")
@@ -684,7 +764,12 @@ with tab_mensuel:
     # Heures par classe et mois (heat-like table)
     st.write("### Matrice Classe × Mois (heures)")
     pivot = long_f.pivot_table(index="Classe", columns="Mois", values="Heures", aggfunc="sum", fill_value=0).reindex(columns=MOIS_COLS)
-    st.dataframe(pivot, use_container_width=True)
+    st.dataframe(style_table(pivot.reset_index()), use_container_width=True)
+
+    fig = px.imshow(pivot.values, x=pivot.columns, y=pivot.index, aspect="auto",
+                    title="Heatmap — Heures par classe et par mois")
+    st.plotly_chart(fig, use_container_width=True)
+
 
     st.write("### Classe la plus active par mois")
     top_by_month = pivot.idxmax(axis=0).to_frame(name="Classe top").T

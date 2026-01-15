@@ -916,7 +916,7 @@ with tab_classes:
     comp = pd.DataFrame({"Indicateur": list(kA.keys()), cls1: list(kA.values()), cls2: list(kB.values())})
     st.dataframe(comp, use_container_width=True)
 
-    st.write("### Retards (Top 15) — Classe A")
+    st.write(f"### Retards (Top 15) — {cls1}")
     tA = A.sort_values("Écart").head(15)[["Matière","VHP","VHR","Écart","Taux","Statut_auto","Observations"]].copy()
     tA["Taux (%)"] = (tA["Taux"] * 100).round(1)
     st.dataframe(
@@ -930,7 +930,7 @@ with tab_classes:
         }
     )
 
-    st.write("### Retards (Top 15) — Classe B")
+    st.write(f"### Retards (Top 15) — {cls2}")
     tB = B.sort_values("Écart").head(15)[["Matière","VHP","VHR","Écart","Taux","Statut_auto","Observations"]].copy()
     tB["Taux (%)"] = (tB["Taux"] * 100).round(1)
     st.dataframe(

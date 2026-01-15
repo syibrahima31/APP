@@ -759,33 +759,42 @@ tab_overview, tab_classes, tab_matieres, tab_mensuel, tab_alertes, tab_qualite, 
 with tab_overview:
     st.subheader("KPIs globaux (période sélectionnée)")
 
-    st.markdown(
-    f"""
-    <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:6px;">
-      <div style="background:#fff;border:1px solid #E6EAF2;border-radius:18px;padding:14px 16px;box-shadow:0 10px 24px rgba(14,30,37,0.06);">
-        <div style="font-weight:900;opacity:.75;font-size:12px;">Matières</div>
-        <div style="font-weight:950;font-size:22px;margin-top:6px;">{total}</div>
-      </div>
-      <div style="background:#fff;border:1px solid #E6EAF2;border-radius:18px;padding:14px 16px;box-shadow:0 10px 24px rgba(14,30,37,0.06);">
-        <div style="font-weight:900;opacity:.75;font-size:12px;">Taux moyen</div>
-        <div style="font-weight:950;font-size:22px;margin-top:6px;">{taux_moy:.1f}%</div>
-      </div>
-      <div style="background:#fff;border:1px solid #E6EAF2;border-radius:18px;padding:14px 16px;box-shadow:0 10px 24px rgba(14,30,37,0.06);">
-        <div style="font-weight:900;opacity:.75;font-size:12px;">Terminées</div>
-        <div style="font-weight:950;font-size:22px;margin-top:6px;">{nb_term}</div>
-      </div>
-      <div style="background:#fff;border:1px solid #E6EAF2;border-radius:18px;padding:14px 16px;box-shadow:0 10px 24px rgba(14,30,37,0.06);">
-        <div style="font-weight:900;opacity:.75;font-size:12px;">En cours</div>
-        <div style="font-weight:950;font-size:22px;margin-top:6px;">{nb_enc}</div>
-      </div>
-      <div style="background:#fff;border:1px solid #E6EAF2;border-radius:18px;padding:14px 16px;box-shadow:0 10px 24px rgba(14,30,37,0.06);">
-        <div style="font-weight:900;opacity:.75;font-size:12px;">Retard cumulé (h)</div>
-        <div style="font-weight:950;font-size:22px;margin-top:6px;">{retard_total:.0f}</div>
-      </div>
-    </div>
-    """,
-    unsafe_allow_html=True)
+    # ----- Calculs KPI (DOIT être AVANT le HTML) -----
+    total = int(len(filtered))
+    taux_moy = float(filtered["Taux"].mean() * 100) if total else 0.0
+    nb_term = int((filtered["Statut_auto"] == "Terminé").sum())
+    nb_enc  = int((filtered["Statut_auto"] == "En cours").sum())
+    nb_nd   = int((filtered["Statut_auto"] == "Non démarré").sum())
+    retard_total = float(filtered.loc[filtered["Écart"] < 0, "Écart"].sum()) if total else 0.0
 
+    # ----- KPI en cartes HTML (NOTE: f""" ... """ obligatoire) -----
+    st.markdown(
+        f"""
+        <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:6px;">
+          <div style="background:#fff;border:1px solid #E6EAF2;border-radius:18px;padding:14px 16px;box-shadow:0 10px 24px rgba(14,30,37,0.06);">
+            <div style="font-weight:900;opacity:.75;font-size:12px;">Matières</div>
+            <div style="font-weight:950;font-size:22px;margin-top:6px;">{total}</div>
+          </div>
+          <div style="background:#fff;border:1px solid #E6EAF2;border-radius:18px;padding:14px 16px;box-shadow:0 10px 24px rgba(14,30,37,0.06);">
+            <div style="font-weight:900;opacity:.75;font-size:12px;">Taux moyen</div>
+            <div style="font-weight:950;font-size:22px;margin-top:6px;">{taux_moy:.1f}%</div>
+          </div>
+          <div style="background:#fff;border:1px solid #E6EAF2;border-radius:18px;padding:14px 16px;box-shadow:0 10px 24px rgba(14,30,37,0.06);">
+            <div style="font-weight:900;opacity:.75;font-size:12px;">Terminées</div>
+            <div style="font-weight:950;font-size:22px;margin-top:6px;">{nb_term}</div>
+          </div>
+          <div style="background:#fff;border:1px solid #E6EAF2;border-radius:18px;padding:14px 16px;box-shadow:0 10px 24px rgba(14,30,37,0.06);">
+            <div style="font-weight:900;opacity:.75;font-size:12px;">En cours</div>
+            <div style="font-weight:950;font-size:22px;margin-top:6px;">{nb_enc}</div>
+          </div>
+          <div style="background:#fff;border:1px solid #E6EAF2;border-radius:18px;padding:14px 16px;box-shadow:0 10px 24px rgba(14,30,37,0.06);">
+            <div style="font-weight:900;opacity:.75;font-size:12px;">Retard cumulé (h)</div>
+            <div style="font-weight:950;font-size:22px;margin-top:6px;">{retard_total:.0f}</div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     st.divider()
 

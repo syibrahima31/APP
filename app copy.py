@@ -308,11 +308,17 @@ def compute_metrics(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def unpivot_months(df: pd.DataFrame) -> pd.DataFrame:
-    # Format long : Classe, Matière, VHP, Mois, Heures
-    id_cols = [c for c in ["Classe", "Matière", "VHP", "VHR", "Écart", "Taux", "Statut_auto", "Statut", "Observations"] if c in df.columns]
+    # Format long : Classe, Matière, Mois, Heures + colonnes pro conservées
+    keep = [
+        "Classe", "Semestre", "Matière", "Responsable", "Type", "Début prévu", "Fin prévue",
+        "VHP", "VHR", "Écart", "Taux", "Statut_auto", "Observations"
+    ]
+    id_cols = [c for c in keep if c in df.columns]
+
     long = df.melt(id_vars=id_cols, value_vars=MOIS_COLS, var_name="Mois", value_name="Heures")
     long["Mois_idx"] = long["Mois"].map(MOIS_ORDER).fillna(0).astype(int)
     return long
+
 
 def df_to_excel_bytes(sheets: Dict[str, pd.DataFrame]) -> bytes:
     output = io.BytesIO()
@@ -368,7 +374,7 @@ def load_excel_all_sheets(file_bytes: bytes) -> Tuple[pd.DataFrame, Dict[str, Li
 
         # Détection colonnes minimales
         missing = []
-        for col in ["Matière", "Semestre", "VHP"]:
+        for col in ["Matière",  "VHP"]:
             if col not in df.columns:
                 missing.append(col)
 
@@ -470,11 +476,23 @@ def build_pdf_report(
     else:
         # Top 12 alertes
         crit = crit.sort_values(["Classe", "Écart"])
-        rows = [["Classe", "Matière", "VHP", "VHR", "Écart", "Statut"]]
+        rows = [["Classe", "Sem.", "Matière", "Resp.", "Type", "VHP", "VHR", "Écart", "Statut"]]
         for _, r in crit.head(12).iterrows():
-            rows.append([str(r["Classe"]), str(r["Matière"])[:45], f"{r['VHP']:.0f}", f"{r['VHR']:.0f}", f"{r['Écart']:.0f}", str(r["Statut_auto"])])
-        t = Table(rows, colWidths=[2.4*cm, 8.2*cm, 1.3*cm, 1.3*cm, 1.3*cm, 2.6*cm])
-        t.setStyle(TableStyle([
+            rows.append([
+                str(r.get("Classe","")),
+                str(r.get("Semestre",""))[:3],
+                str(r.get("Matière",""))[:35],
+                str(r.get("Responsable",""))[:18],
+                str(r.get("Type",""))[:6],
+                f"{r.get('VHP',0):.0f}",
+                f"{r.get('VHR',0):.0f}",
+                f"{r.get('Écart',0):.0f}",
+                str(r.get("Statut_auto","")),
+            ])
+
+            t = Table(rows, colWidths=[1.8*cm, 1.0*cm, 5.4*cm, 2.4*cm, 1.0*cm, 1.1*cm, 1.1*cm, 1.1*cm, 2.1*cm])
+            
+            t.setStyle(TableStyle([
             ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#F0F3F8")),
             ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
             ("FONTSIZE", (0,0), (-1,-1), 8),
@@ -501,11 +519,28 @@ def build_pdf_report(
         story.append(Spacer(1, 6))
 
         # Table compacte (top retards)
+        # Table compacte (top retards) — VERSION PRO
         gg = g.sort_values("Écart").copy()
-        rows = [["Matière", "VHP", "VHR", "Écart", "Taux", "Statut"]]
+
+        rows = [["Sem.", "Matière", "Resp.", "Type", "VHP", "VHR", "Écart", "Taux", "Statut"]]
         for _, r in gg.head(15).iterrows():
-            rows.append([str(r["Matière"])[:45], f"{r['VHP']:.0f}", f"{r['VHR']:.0f}", f"{r['Écart']:.0f}", f"{(r['Taux']*100):.0f}%", str(r["Statut_auto"])])
-        t = Table(rows, colWidths=[8.6*cm, 1.3*cm, 1.3*cm, 1.3*cm, 1.3*cm, 2.2*cm])
+            rows.append([
+                str(r.get("Semestre", ""))[:3],
+                str(r.get("Matière", ""))[:28],
+                str(r.get("Responsable", ""))[:16],
+                str(r.get("Type", ""))[:6],
+                f"{r.get('VHP', 0):.0f}",
+                f"{r.get('VHR', 0):.0f}",
+                f"{r.get('Écart', 0):.0f}",
+                f"{(r.get('Taux', 0)*100):.0f}%",
+                str(r.get("Statut_auto", "")),
+            ])
+
+        t = Table(
+            rows,
+            colWidths=[1.0*cm, 5.0*cm, 2.3*cm, 1.0*cm, 1.1*cm, 1.1*cm, 1.1*cm, 1.1*cm, 2.0*cm]
+        )
+
         t.setStyle(TableStyle([
             ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#0B3D91")),
             ("TEXTCOLOR", (0,0), (-1,0), colors.white),
@@ -667,6 +702,18 @@ selected_classes = st.sidebar.multiselect("Classes", classes, default=classes)
 status_opts = ["Non démarré", "En cours", "Terminé"]
 selected_status = st.sidebar.multiselect("Statuts", status_opts, default=status_opts)
 
+# -----------------------------
+# Filtres PRO : Responsable + Type
+# -----------------------------
+resp_opts = sorted([x for x in df_period["Responsable"].dropna().unique().tolist() if str(x).strip()])
+selected_resp = st.sidebar.multiselect("Responsables", resp_opts, default=resp_opts)
+
+type_opts = sorted([x for x in df_period["Type"].dropna().unique().tolist() if str(x).strip()])
+selected_type = st.sidebar.multiselect("Types (CM/TD/TP)", type_opts, default=type_opts)
+
+
+
+
 search_matiere = st.sidebar.text_input("Recherche Matière (regex)", value="")
 show_only_delay = st.sidebar.checkbox("Uniquement retards (Écart < 0)", value=False)
 min_vhp = st.sidebar.number_input("VHP min", min_value=0.0, value=0.0, step=1.0)
@@ -676,6 +723,13 @@ filtered = df_period[
     & df_period["Statut_auto"].isin(selected_status)
     & (df_period["VHP"] >= min_vhp)
 ].copy()
+
+# Appliquer filtres PRO
+if resp_opts:
+    filtered = filtered[filtered["Responsable"].isin(selected_resp)]
+if type_opts:
+    filtered = filtered[filtered["Type"].isin(selected_type)]
+
 
 # Application du filtre semestre si applicable
 if selected_semestre is not None:
@@ -999,7 +1053,9 @@ with tab_export:
 
     if st.button("Générer le PDF"):
         pdf = build_pdf_report(
-            df=filtered[["Classe","Matière","VHP"] + mois_couverts + ["VHR","Écart","Taux","Statut_auto","Statut","Observations"]].copy(),
+            df=filtered[["Classe","Semestre","Matière","Responsable","Type","Début prévu","Fin prévue","VHP"] 
+            + mois_couverts 
+            + ["VHR","Écart","Taux","Statut_auto","Observations"]].copy(),
             title=pdf_title,
             mois_couverts=mois_couverts,
             thresholds=thresholds,

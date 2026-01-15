@@ -687,7 +687,7 @@ selected_type = st.sidebar.multiselect(
 
 
 type_opts = sorted([x for x in df_period["Type"].dropna().unique().tolist() if str(x).strip()])
-selected_type = st.sidebar.multiselect("Types (CM/TD/TP)", type_opts, default=type_opts, key="filter_type")
+selected_type = st.sidebar.multiselect("Types (CM/TD/TP)", type_opts, default=type_opts, key="filter_type_2")
 
 search_matiere = st.sidebar.text_input("Recherche Matière (regex)", value="")
 show_only_delay = st.sidebar.checkbox("Uniquement retards (Écart < 0)", value=False)

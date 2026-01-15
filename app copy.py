@@ -528,10 +528,10 @@ with st.sidebar:
     # Période
     st.subheader("Période couverte")
     mois_min, mois_max = st.select_slider(
-        "Mois (de → à)",
-        options=MOIS_COLS,
-        value=("Oct", "Mai"),
-    )
+    "Mois (de → à)",
+    options=MOIS_COLS,
+    value=("Oct", "Août"),)
+ 
     mois_couverts = MOIS_COLS[MOIS_COLS.index(mois_min): MOIS_COLS.index(mois_max) + 1]
 
     # Seuils

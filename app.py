@@ -40,18 +40,28 @@ st.set_page_config(
 
 st.markdown(
     """
-  <style>
-      /* ============ GLOBAL LAYOUT FIXES ============ */
-      /* Réduit les surprises de padding/marges Streamlit */
-      .stApp { background: #F6F8FC; }
-
-      /* Le bloc principal (evite que le bandeau paraisse "décalé") */
+    <style>
+      /* ============ FIX TOP BAR / PADDING STREAMLIT ============ */
+      /* Retire l'espace inutile au-dessus */
       .block-container{
-        padding-top: 1.2rem !important;
+        padding-top: 0.3rem !important;   /* <-- IMPORTANT (au lieu de 1.2rem) */
         padding-bottom: 2.0rem !important;
       }
 
-      /* Sidebar */
+      /* Neutralise la barre header Streamlit (souvent responsable du "haut") */
+      header[data-testid="stHeader"]{
+        background: transparent !important;
+        height: 0px !important;
+      }
+
+      /* Evite que le bandeau soit collé à un margin top interne */
+      .iaid-banner{
+        margin-top: 0px !important;       /* <-- IMPORTANT */
+      }
+
+      /* ============ GLOBAL ============ */
+      .stApp { background: #F6F8FC; }
+
       section[data-testid="stSidebar"] {
         background: #FFFFFF;
         border-right: 1px solid #E6EAF2;
@@ -64,11 +74,11 @@ st.markdown(
         padding: 18px 20px;
         border-radius: 20px;
         box-shadow: 0 12px 28px rgba(14, 30, 37, 0.12);
-        margin: 4px 0 16px 0;
+        margin: 0 0 16px 0;               /* <-- IMPORTANT : plus de 4px en haut */
         position: relative;
         overflow: hidden;
       }
-      /* petit effet “shine” léger */
+
       .iaid-banner:before{
         content:"";
         position:absolute;
@@ -109,13 +119,11 @@ st.markdown(
       }
 
       /* ============ KPI CARDS (st.metric) ============ */
-      /* Le container des metrics varie : on vise le "grand parent" */
       div[data-testid="stMetric"]{
         background: transparent !important;
         border: none !important;
         padding: 0 !important;
       }
-      /* Le vrai “cadre” */
       div[data-testid="stMetric"] > div{
         background: #FFFFFF;
         border: 1px solid #E6EAF2;
@@ -123,8 +131,6 @@ st.markdown(
         border-radius: 18px;
         box-shadow: 0 10px 24px rgba(14, 30, 37, 0.06);
       }
-
-      /* Texte metric */
       div[data-testid="stMetricLabel"] p{
         font-weight: 800 !important;
         opacity: 0.85;
@@ -133,13 +139,13 @@ st.markdown(
         font-weight: 900 !important;
       }
 
-      /* ============ Tabs titles ============ */
+      /* Tabs */
       button[data-baseweb="tab"]{
         font-weight: 800 !important;
         letter-spacing: 0.2px;
       }
 
-      /* ============ Tables/DataFrame ============ */
+      /* Dataframes */
       div[data-testid="stDataFrame"]{
         background: #FFFFFF;
         border: 1px solid #E6EAF2;
@@ -155,7 +161,7 @@ st.markdown(
         font-weight: 800 !important;
       }
 
-      /* ============ Badges statut HTML ============ */
+      /* Badges */
       .badge{
         display:inline-block;
         padding: 4px 10px;
@@ -168,12 +174,11 @@ st.markdown(
       .badge-ok{ background:#E9F7EF; color:#145A32; }
       .badge-warn{ background:#FEF5E7; color:#7D6608; }
       .badge-bad{ background:#FDEDEC; color:#922B21; }
-
     </style>
-
     """,
     unsafe_allow_html=True
 )
+
 
 st.markdown(
     """

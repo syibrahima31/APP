@@ -681,8 +681,6 @@ selected_type = st.sidebar.multiselect(
 
 
 
-type_opts = sorted([x for x in df_period["Type"].dropna().unique().tolist() if str(x).strip()])
-selected_type = st.sidebar.multiselect("Types (CM/TD/TP)", type_opts, default=type_opts, key="filter_type_2")
 
 search_matiere = st.sidebar.text_input("Recherche Matière (regex)", value="")
 show_only_delay = st.sidebar.checkbox("Uniquement retards (Écart < 0)", value=False)
@@ -926,7 +924,7 @@ with tab_mensuel:
 
     long = unpivot_months(df_period)
     # Appliquer filtres classes/statuts à la table longue via merge index
-    base_keys = filtered[["_rowid"]].drop_duplicates()
+    base_keys = filtered_base[["_rowid"]].drop_duplicates()
     long_f = long.merge(base_keys, on="_rowid", how="inner")
 
 
@@ -946,21 +944,18 @@ with tab_mensuel:
 
 
     st.write("### Classe la plus active par mois")
-    # --- FIX: éviter ValueError si pivot vide ou tout NaN ---
-if pivot.empty or pivot.dropna(how="all").empty:
-    st.warning("Aucune donnée mensuelle disponible avec les filtres actuels (pivot vide).")
-else:
-    # s'assurer que c'est bien numérique
-    pivot_num = pivot.apply(pd.to_numeric, errors="coerce")
 
-    # si chaque colonne est NaN, idxmax plante -> on gère
-    if pivot_num.isna().all().all():
-        st.warning("Aucune valeur numérique exploitable pour déterminer la classe top par mois.")
+    if pivot.empty:
+        st.warning("Aucune donnée mensuelle disponible avec les filtres actuels.")
     else:
-        top_by_month = pivot_num.idxmax(axis=0).to_frame(name="Classe top").T
-        st.dataframe(top_by_month, use_container_width=True)
+        pivot_num = pivot.apply(pd.to_numeric, errors="coerce")
 
-    st.dataframe(top_by_month, use_container_width=True)
+        if pivot_num.isna().all().all():
+            st.warning("Aucune valeur numérique exploitable pour déterminer la classe top par mois.")
+        else:
+            top_by_month = pivot_num.idxmax(axis=0).to_frame(name="Classe top").T
+            st.dataframe(top_by_month, use_container_width=True)
+
 
 # ====== ALERTES ======
 with tab_alertes:

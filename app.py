@@ -676,7 +676,7 @@ selected_resp = st.sidebar.multiselect(
 
 type_opts = sorted([x for x in df_period["Type"].dropna().unique().tolist() if str(x).strip()])
 selected_type = st.sidebar.multiselect(
-    "Types (CM/TD/TP)", type_opts, default=type_opts, key="ms_types"
+    "Types (CM/TD/TP)", type_opts, default=[], key="ms_types"
 )
 
 
@@ -721,10 +721,12 @@ apply_teacher_filters = st.sidebar.checkbox(
 filtered = filtered_base.copy()
 
 if apply_teacher_filters:
-    if resp_opts and selected_resp:
+    if len(selected_resp) > 0:
         filtered = filtered[filtered["Responsable"].isin(selected_resp)]
-    if type_opts and selected_type:
+
+    if len(selected_type) > 0:
         filtered = filtered[filtered["Type"].isin(selected_type)]
+
 
 # -----------------------------
 # Onglets (Ultra)

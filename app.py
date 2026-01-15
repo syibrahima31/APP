@@ -949,7 +949,20 @@ with tab_mensuel:
 
 
     st.write("### Classe la plus active par mois")
-    top_by_month = pivot.idxmax(axis=0).to_frame(name="Classe top").T
+    # --- FIX: éviter ValueError si pivot vide ou tout NaN ---
+if pivot.empty or pivot.dropna(how="all").empty:
+    st.warning("Aucune donnée mensuelle disponible avec les filtres actuels (pivot vide).")
+else:
+    # s'assurer que c'est bien numérique
+    pivot_num = pivot.apply(pd.to_numeric, errors="coerce")
+
+    # si chaque colonne est NaN, idxmax plante -> on gère
+    if pivot_num.isna().all().all():
+        st.warning("Aucune valeur numérique exploitable pour déterminer la classe top par mois.")
+    else:
+        top_by_month = pivot_num.idxmax(axis=0).to_frame(name="Classe top").T
+        st.dataframe(top_by_month, use_container_width=True)
+
     st.dataframe(top_by_month, use_container_width=True)
 
 # ====== ALERTES ======

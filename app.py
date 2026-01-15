@@ -249,12 +249,13 @@ def to_numeric_safe(s: pd.Series) -> pd.Series:
 def compute_metrics(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     # --------- AJOUT PRO : colonnes garanties ---------
-    for c in ["Responsable", "Type", "Semestre", "Observations", "Début prévu", "Fin prévue"]:
+    for c in ["Semestre", "Observations", "Début prévu", "Fin prévue"]:
         if c not in df.columns:
             df[c] = ""
 
+
     # Nettoyage texte (éviter 'nan')
-    for c in ["Matière", "Responsable", "Type", "Semestre", "Observations"]:
+    for c in ["Matière", "Semestre", "Observations"]:
         df[c] = df[c].astype(str).replace({"nan": "", "None": ""}).fillna("").str.strip()
 
     df["Début prévu"] = df["Début prévu"].astype(str).replace({"nan": "", "None": ""}).fillna("").str.strip()
@@ -668,19 +669,6 @@ selected_classes = st.sidebar.multiselect("Classes", classes, default=classes)
 status_opts = ["Non démarré", "En cours", "Terminé"]
 selected_status = st.sidebar.multiselect("Statuts", status_opts, default=status_opts)
 
-# --------- AJOUT PRO : filtres Responsable + Type ---------
-resp_opts = sorted([x for x in df_period["Responsable"].dropna().unique().tolist() if str(x).strip()])
-selected_resp = st.sidebar.multiselect(
-    "Responsables", resp_opts, default=resp_opts, key="ms_responsables"
-)
-
-type_opts = sorted([x for x in df_period["Type"].dropna().unique().tolist() if str(x).strip()])
-selected_type = st.sidebar.multiselect(
-    "Types (CM/TD/TP)", type_opts, default=[], key="ms_types"
-)
-
-
-
 
 search_matiere = st.sidebar.text_input("Recherche Matière (regex)", value="")
 show_only_delay = st.sidebar.checkbox("Uniquement retards (Écart < 0)", value=False)
@@ -712,21 +700,9 @@ if show_only_delay:
     filtered_base = filtered_base[filtered_base["Écart"] < 0]
 
 # -----------------------------
-# Filtres Enseignant/Type : OPTIONNELS
+# Dataset final (sans Enseignant/Type)
 # -----------------------------
-apply_teacher_filters = st.sidebar.checkbox(
-    "Appliquer filtres Enseignant/Type", value=False, key="cb_apply_teacher"
-)
-
 filtered = filtered_base.copy()
-
-if apply_teacher_filters:
-    if len(selected_resp) > 0:
-        filtered = filtered[filtered["Responsable"].isin(selected_resp)]
-
-    if len(selected_type) > 0:
-        filtered = filtered[filtered["Type"].isin(selected_type)]
-
 
 # -----------------------------
 # Onglets (Ultra)
@@ -1017,10 +993,11 @@ with tab_export:
 
     st.write("### Export Excel consolidé")
     export_df = filtered[
-    ["Classe","Semestre","Matière","Responsable","Type","Début prévu","Fin prévue","VHP"]
+    ["Classe","Semestre","Matière","Début prévu","Fin prévue","VHP"]
     + MOIS_COLS
     + ["VHR","Écart","Taux","Statut_auto","Observations"]
     ].copy()
+
 
     export_df["Taux"] = (export_df["Taux"]*100).round(2)
 
@@ -1057,10 +1034,11 @@ with tab_export:
     if st.button("Générer le PDF"):
         pdf = build_pdf_report(
         df=filtered[
-        ["Classe","Semestre","Matière","Responsable","Type","Début prévu","Fin prévue","VHP"]
+        ["Classe","Semestre","Matière","Début prévu","Fin prévue","VHP"]
         + mois_couverts
         + ["VHR","Écart","Taux","Statut_auto","Observations"]
         ].copy(),
+
             title=pdf_title,
             mois_couverts=mois_couverts,
             thresholds=thresholds,

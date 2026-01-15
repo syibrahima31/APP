@@ -40,18 +40,83 @@ st.set_page_config(
 
 st.markdown(
     """
-    <style>
-      /* --- Fond global --- */
+  <style>
+      /* ============ GLOBAL LAYOUT FIXES ============ */
+      /* Réduit les surprises de padding/marges Streamlit */
       .stApp { background: #F6F8FC; }
 
-      /* --- Sidebar --- */
+      /* Le bloc principal (evite que le bandeau paraisse "décalé") */
+      .block-container{
+        padding-top: 1.2rem !important;
+        padding-bottom: 2.0rem !important;
+      }
+
+      /* Sidebar */
       section[data-testid="stSidebar"] {
         background: #FFFFFF;
         border-right: 1px solid #E6EAF2;
       }
 
-      /* --- Cartes KPI (metrics) --- */
+      /* ============ BANNER ============ */
+      .iaid-banner{
+        background: linear-gradient(90deg, #0B3D91 0%, #1F6FEB 100%);
+        color: white;
+        padding: 18px 20px;
+        border-radius: 20px;
+        box-shadow: 0 12px 28px rgba(14, 30, 37, 0.12);
+        margin: 4px 0 16px 0;
+        position: relative;
+        overflow: hidden;
+      }
+      /* petit effet “shine” léger */
+      .iaid-banner:before{
+        content:"";
+        position:absolute;
+        top:-40%;
+        left:-20%;
+        width:60%;
+        height:200%;
+        transform: rotate(20deg);
+        background: rgba(255,255,255,0.10);
+      }
+      .iaid-banner .title{
+        font-size: 20px;
+        font-weight: 900;
+        letter-spacing: 0.2px;
+        position: relative;
+      }
+      .iaid-banner .subtitle{
+        font-size: 13px;
+        opacity: 0.95;
+        margin-top: 6px;
+        position: relative;
+      }
+      .iaid-badges{
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        position: relative;
+      }
+      .iaid-badge{
+        background: rgba(255,255,255,0.16);
+        border: 1px solid rgba(255,255,255,0.22);
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+        backdrop-filter: blur(4px);
+      }
+
+      /* ============ KPI CARDS (st.metric) ============ */
+      /* Le container des metrics varie : on vise le "grand parent" */
       div[data-testid="stMetric"]{
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+      }
+      /* Le vrai “cadre” */
+      div[data-testid="stMetric"] > div{
         background: #FFFFFF;
         border: 1px solid #E6EAF2;
         padding: 14px 16px;
@@ -59,13 +124,22 @@ st.markdown(
         box-shadow: 0 10px 24px rgba(14, 30, 37, 0.06);
       }
 
-      /* --- Titres d'onglets --- */
+      /* Texte metric */
+      div[data-testid="stMetricLabel"] p{
+        font-weight: 800 !important;
+        opacity: 0.85;
+      }
+      div[data-testid="stMetricValue"]{
+        font-weight: 900 !important;
+      }
+
+      /* ============ Tabs titles ============ */
       button[data-baseweb="tab"]{
-        font-weight: 700 !important;
+        font-weight: 800 !important;
         letter-spacing: 0.2px;
       }
 
-      /* --- Dataframes / tables --- */
+      /* ============ Tables/DataFrame ============ */
       div[data-testid="stDataFrame"]{
         background: #FFFFFF;
         border: 1px solid #E6EAF2;
@@ -74,59 +148,29 @@ st.markdown(
         box-shadow: 0 10px 24px rgba(14, 30, 37, 0.04);
       }
 
-      /* --- Boutons --- */
+      /* Buttons */
       .stDownloadButton button, .stButton button{
         border-radius: 14px !important;
         padding: 10px 14px !important;
-        font-weight: 700 !important;
+        font-weight: 800 !important;
       }
 
-      /* --- Bandeau IAID --- */
-      .iaid-banner{
-        background: linear-gradient(90deg, #0B3D91 0%, #1F6FEB 100%);
-        color: white;
-        padding: 16px 18px;
-        border-radius: 18px;
-        box-shadow: 0 10px 24px rgba(14, 30, 37, 0.10);
-        margin-bottom: 14px;
-      }
-      .iaid-banner .title{
-        font-size: 18px;
-        font-weight: 800;
-      }
-      .iaid-banner .subtitle{
-        font-size: 13px;
-        opacity: 0.95;
-        margin-top: 4px;
-      }
-      .iaid-badges{
-        margin-top: 10px;
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-      .iaid-badge{
-        background: rgba(255,255,255,0.18);
-        border: 1px solid rgba(255,255,255,0.25);
-        padding: 5px 10px;
-        border-radius: 999px;
-        font-size: 12px;
-        font-weight: 700;
-      }
-
-      /* --- Badges statut --- */
+      /* ============ Badges statut HTML ============ */
       .badge{
         display:inline-block;
         padding: 4px 10px;
         border-radius: 999px;
-        font-weight: 800;
+        font-weight: 900;
         font-size: 12px;
         border: 1px solid #E6EAF2;
+        white-space: nowrap;
       }
       .badge-ok{ background:#E9F7EF; color:#145A32; }
       .badge-warn{ background:#FEF5E7; color:#7D6608; }
       .badge-bad{ background:#FDEDEC; color:#922B21; }
+
     </style>
+
     """,
     unsafe_allow_html=True
 )

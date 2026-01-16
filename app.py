@@ -272,15 +272,16 @@ st.markdown(
    VARIABLES
 ------------------------------*/
 :root{
-    --blue:#0B3D91;
-    --blue2:#134FA8;
-    --blue3:#1F6FEB;
+  --blue:#1A237E;
+  --blue2:#283593;
+  --blue3:#3949AB;
 
-    --ok:#1E8E3E;
-    --warn:#F29900;
-    --bad:#D93025;
+  --ok:#2E7D32;
+  --warn:#6A1B9A;
+  --bad:#B71C1C;
 
-    --focus:#5AA2FF;
+  --focus:#9FA8DA;
+
 
 }
 

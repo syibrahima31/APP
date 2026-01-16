@@ -745,7 +745,12 @@ def df_to_excel_bytes(sheets: Dict[str, pd.DataFrame]) -> bytes:
 # -----------------------------
 # Rappel mensuel DG/DGE (Email)
 # -----------------------------
-REMINDER_FILE = Path("last_reminder.json")  # stockage simple
+REMINDER_DIR = Path(".streamlit")
+REMINDER_DIR.mkdir(parents=True, exist_ok=True)
+
+REMINDER_FILE = REMINDER_DIR / "last_reminder.json"
+LOCK_FILE     = REMINDER_DIR / "last_reminder.lock"
+
 
 def get_last_reminder_month() -> Optional[str]:
     if REMINDER_FILE.exists():
@@ -757,6 +762,35 @@ def get_last_reminder_month() -> Optional[str]:
 
 def set_last_reminder_month(month_key: str) -> None:
     REMINDER_FILE.write_text(json.dumps({"month": month_key}))
+
+def lock_is_active(month_key: str) -> bool:
+    """
+    Retourne True si un envoi est déjà en cours pour le mois courant.
+    Evite double-envoi si plusieurs sessions ouvrent l'app en même temps.
+    """
+    if not LOCK_FILE.exists():
+        return False
+    try:
+        payload = json.loads(LOCK_FILE.read_text())
+        return payload.get("month") == month_key and payload.get("status") == "sending"
+    except Exception:
+        return False
+
+def set_lock(month_key: str) -> None:
+    LOCK_FILE.write_text(json.dumps({
+        "month": month_key,
+        "status": "sending",
+        "ts": dt.datetime.now().isoformat()
+    }))
+
+def clear_lock() -> None:
+    try:
+        if LOCK_FILE.exists():
+            LOCK_FILE.unlink()
+    except Exception:
+        pass
+
+
 
 def send_email_reminder(
     smtp_host: str,
@@ -1130,6 +1164,11 @@ with st.sidebar:
 
     auto_send = st.checkbox("Auto-envoi 1 fois/mois (à l’ouverture)", value=True)
 
+    # --- Sécurité admin ---
+    pin = st.text_input("Code admin (PIN)", type="password")
+    is_admin = (pin == st.secrets.get("ADMIN_PIN", ""))
+
+
     subject = f"IAID — Rappel mensuel : consulter le Dashboard ({today.strftime('%m/%Y')})"
     body = (
         "Bonjour,\n\n"
@@ -1141,21 +1180,35 @@ with st.sidebar:
     )
 
     def do_send():
-        send_email_reminder(
-            smtp_host=st.secrets["SMTP_HOST"],
-            smtp_port=int(st.secrets["SMTP_PORT"]),
-            smtp_user=st.secrets["SMTP_USER"],
-            smtp_pass=st.secrets["SMTP_PASS"],
-            sender=st.secrets["SMTP_FROM"],
-            recipients=recipients,
-            subject=subject,
-            body=body,
-        )
-        set_last_reminder_month(month_key)
+        # 1) lock anti double-envoi
+        set_lock(month_key)
+
+        try:
+            send_email_reminder(
+                smtp_host=st.secrets["SMTP_HOST"],
+                smtp_port=int(st.secrets["SMTP_PORT"]),
+                smtp_user=st.secrets["SMTP_USER"],
+                smtp_pass=st.secrets["SMTP_PASS"],
+                sender=st.secrets["SMTP_FROM"],
+                recipients=recipients,
+                subject=subject,
+                body=body,
+            )
+            # 2) marquer envoyé pour le mois
+            set_last_reminder_month(month_key)
+
+        finally:
+            # 3) libérer le lock même en cas d'erreur
+            clear_lock()
+
 
     if st.button("Envoyer le rappel maintenant"):
-        if not recipients:
+        if not is_admin:
+            st.error("Accès refusé : PIN incorrect.")
+        elif not recipients:
             st.error("DG_EMAILS est vide dans st.secrets.")
+        elif lock_is_active(month_key):
+            st.warning("Un envoi est déjà en cours (anti double-envoi).")
         else:
             try:
                 do_send()
@@ -1163,13 +1216,19 @@ with st.sidebar:
             except Exception as e:
                 st.error(f"Erreur envoi: {e}")
 
-    if auto_send and (last_sent != month_key) and recipients:
-        st.info("Auto-rappel : pas encore envoyé ce mois-ci → envoi maintenant.")
-        try:
-            do_send()
-            st.success("Rappel mensuel envoyé automatiquement ✅")
-        except Exception as e:
-            st.error(f"Auto-envoi échoué: {e}")
+
+    if auto_send and recipients:
+        if last_sent == month_key:
+            st.caption("Auto-rappel : déjà envoyé ce mois-ci ✅")
+        elif lock_is_active(month_key):
+            st.info("Auto-rappel : un envoi est déjà en cours (anti double-envoi).")
+        else:
+            st.info("Auto-rappel : pas encore envoyé ce mois-ci → envoi maintenant.")
+            try:
+                do_send()
+                st.success("Rappel mensuel envoyé automatiquement ✅")
+            except Exception as e:
+                st.error(f"Auto-envoi échoué: {e}")
 
     sidebar_card_end()
 

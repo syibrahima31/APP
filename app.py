@@ -41,38 +41,268 @@ st.set_page_config(
     page_icon="📊",
 )
 
+# st.markdown(
+# """
+# <style>
+# /* =========================================================
+#    IAID PREMIUM THEME (Header + KPI + Sidebar cards)
+#    ========================================================= */
+
+# .block-container{ padding-top: .20rem !important; padding-bottom: 2rem !important; }
+# header[data-testid="stHeader"]{ background: transparent !important; height: 0px !important; }
+# div[data-testid="stToolbar"]{ visibility: hidden !important; height: 0px !important; position: fixed !important; }
+
+# .stApp{
+#   background: radial-gradient(1200px 600px at 10% 0%, rgba(31,111,235,0.10), transparent 55%),
+#               radial-gradient(1200px 600px at 90% 0%, rgba(11,61,145,0.10), transparent 55%),
+#               #F6F8FC;
+# }
+
+# /* ---------------- Sidebar premium ---------------- */
+# section[data-testid="stSidebar"]{
+#   background: linear-gradient(180deg, #FFFFFF 0%, #FBFCFF 100%);
+#   border-right: 1px solid rgba(230,234,242,0.9);
+# }
+# .sidebar-card{
+#   background: #FFFFFF;
+#   border: 1px solid rgba(230,234,242,0.95);
+#   border-radius: 18px;
+#   padding: 12px 12px;
+#   box-shadow: 0 10px 22px rgba(14,30,37,0.05);
+#   margin-bottom: 10px;
+# }
+
+# /* ---------------- Header premium ---------------- */
+# .iaid-header{
+#   background: linear-gradient(100deg, #0B3D91 0%, #1F6FEB 55%, #5AA2FF 100%);
+#   color:#fff;
+#   padding: 18px 20px;
+#   border-radius: 22px;
+#   box-shadow: 0 18px 40px rgba(14,30,37,0.14);
+#   position: relative;
+#   overflow:hidden;
+#   margin: 0 0 14px 0;
+# }
+# .iaid-header:before{
+#   content:"";
+#   position:absolute;
+#   top:-45%;
+#   left:-25%;
+#   width:70%;
+#   height:220%;
+#   transform: rotate(18deg);
+#   background: rgba(255,255,255,0.10);
+# }
+# .iaid-header:after{
+#   content:"";
+#   position:absolute;
+#   right:-120px;
+#   top:-120px;
+#   width:260px;
+#   height:260px;
+#   border-radius: 50%;
+#   background: rgba(255,255,255,0.10);
+# }
+# .iaid-hrow{
+#   display:flex;
+#   gap:14px;
+#   align-items:center;
+#   justify-content: space-between;
+#   position:relative;
+# }
+# .iaid-hleft{
+#   display:flex;
+#   gap:14px;
+#   align-items:center;
+# }
+# .iaid-logo{
+#   width:54px; height:54px;
+#   border-radius: 16px;
+#   background: rgba(255,255,255,0.16);
+#   border: 1px solid rgba(255,255,255,0.24);
+#   display:flex; align-items:center; justify-content:center;
+#   overflow:hidden;
+# }
+# .iaid-logo img{ width:100%; height:100%; object-fit:cover; }
+# .iaid-htitle{ font-size: 20px; font-weight: 950; letter-spacing:.3px; }
+# .iaid-hsub{ margin-top:6px; font-size: 13px; opacity:.95; line-height:1.35; }
+# .iaid-meta{
+#   text-align:right;
+#   font-size:12px;
+#   opacity:.95;
+#   font-weight: 800;
+# }
+# .iaid-badges{
+#   margin-top: 12px;
+#   display:flex;
+#   gap: 8px;
+#   flex-wrap: wrap;
+#   position: relative;
+# }
+# .iaid-badge{
+#   background: rgba(255,255,255,0.16);
+#   border: 1px solid rgba(255,255,255,0.24);
+#   padding: 6px 10px;
+#   border-radius: 999px;
+#   font-size: 12px;
+#   font-weight: 850;
+#   backdrop-filter: blur(6px);
+# }
+
+# /* ---------------- Buttons premium ---------------- */
+# .stDownloadButton button, .stButton button{
+#   border-radius: 16px !important;
+#   padding: 10px 14px !important;
+#   font-weight: 850 !important;
+#   border: 1px solid rgba(230,234,242,0.95) !important;
+#   box-shadow: 0 10px 22px rgba(14,30,37,0.06);
+# }
+# .stDownloadButton button:hover, .stButton button:hover{
+#   transform: translateY(-1px);
+#   box-shadow: 0 14px 30px rgba(14,30,37,0.10);
+# }
+
+# /* ---------------- Tabs pills ---------------- */
+# div[data-baseweb="tab-list"]{ gap: 8px !important; }
+# button[data-baseweb="tab"]{
+#   border-radius: 999px !important;
+#   padding: 10px 14px !important;
+#   font-weight: 850 !important;
+#   background: #FFFFFF !important;
+#   border: 1px solid rgba(230,234,242,0.95) !important;
+#   box-shadow: 0 10px 22px rgba(14,30,37,0.04);
+# }
+# button[data-baseweb="tab"][aria-selected="true"]{
+#   background: linear-gradient(90deg, rgba(11,61,145,0.12), rgba(31,111,235,0.12)) !important;
+#   border: 1px solid rgba(31,111,235,0.35) !important;
+# }
+
+# /* ---------------- Dataframes card ---------------- */
+# div[data-testid="stDataFrame"]{
+#   background: #FFFFFF;
+#   border: 1px solid rgba(230,234,242,0.95);
+#   border-radius: 20px;
+#   padding: 6px;
+#   box-shadow: 0 12px 26px rgba(14, 30, 37, 0.05);
+# }
+
+# /* ---------------- KPI HTML cards ---------------- */
+# .kpi-grid{
+#   display:grid;
+#   grid-template-columns:repeat(5,minmax(0,1fr));
+#   gap:12px;
+#   margin-top:6px;
+# }
+# .kpi{
+#   background: linear-gradient(180deg, #FFFFFF 0%, #FBFCFF 100%);
+#   border: 1px solid rgba(230,234,242,0.95);
+#   border-radius: 20px;
+#   padding: 14px 16px;
+#   box-shadow: 0 12px 26px rgba(14,30,37,0.07);
+#   position: relative;
+#   overflow: hidden;
+# }
+# .kpi:before{
+#   content:"";
+#   position:absolute;
+#   left:0; top:0;
+#   width:100%; height:3px;
+#   background: linear-gradient(90deg, #0B3D91 0%, #1F6FEB 55%, #5AA2FF 100%);
+#   opacity:.95;
+# }
+# .kpi .label{ font-weight: 900; opacity:.75; font-size:12px; }
+# .kpi .value{ font-weight: 950; font-size:22px; margin-top:6px; }
+# .kpi .hint{ margin-top:6px; font-size:12px; opacity:.75; font-weight: 800; }
+
+# .kpi-good:before{ background: linear-gradient(90deg, #1E8E3E, #34A853) !important; }
+# .kpi-warn:before{ background: linear-gradient(90deg, #F29900, #F6B100) !important; }
+# .kpi-bad:before{ background: linear-gradient(90deg, #D93025, #EA4335) !important; }
+
+# /* ---------------- HTML table (badges) ---------------- */
+# .table-wrap{
+#   overflow-x:auto;
+#   border:1px solid rgba(230,234,242,0.95);
+#   border-radius:20px;
+#   background:#fff;
+#   box-shadow: 0 12px 26px rgba(14,30,37,0.05);
+# }
+# table.iaid-table{
+#   width:100%;
+#   border-collapse: collapse;
+#   font-size: 12px;
+# }
+# table.iaid-table thead th{
+#   background: linear-gradient(180deg, #F3F6FB 0%, #EEF2F8 100%);
+#   text-align:left;
+#   padding:10px 12px;
+#   font-weight:900;
+#   border-bottom:1px solid rgba(230,234,242,0.95);
+# }
+# table.iaid-table tbody td{
+#   padding:10px 12px;
+#   border-bottom:1px solid rgba(242,244,248,0.95);
+#   vertical-align: top;
+# }
+# table.iaid-table tbody tr:hover{ background:#FAFBFE; }
+
+# /* Small hover */
+# .kpi, .iaid-header, div[data-testid="stDataFrame"]{ transition: transform .12s ease, box-shadow .12s ease; }
+# .iaid-header:hover{ transform: translateY(-1px); box-shadow: 0 22px 50px rgba(14,30,37,0.18); }
+# .kpi:hover{ transform: translateY(-2px); box-shadow: 0 18px 40px rgba(14,30,37,0.11); }
+# </style>
+# """,
+# unsafe_allow_html=True
+# )
+
+
 st.markdown(
 """
 <style>
 /* =========================================================
-   IAID PREMIUM THEME (Header + KPI + Sidebar cards)
+   IAID PREMIUM THEME — Background + Glass Cards + Sidebar
    ========================================================= */
 
-.block-container{ padding-top: .20rem !important; padding-bottom: 2rem !important; }
-header[data-testid="stHeader"]{ background: transparent !important; height: 0px !important; }
-div[data-testid="stToolbar"]{ visibility: hidden !important; height: 0px !important; position: fixed !important; }
-
-.stApp{
-  background: radial-gradient(1200px 600px at 10% 0%, rgba(31,111,235,0.10), transparent 55%),
-              radial-gradient(1200px 600px at 90% 0%, rgba(11,61,145,0.10), transparent 55%),
-              #F6F8FC;
+/* --------- Global spacing (évite grand vide en haut) --------- */
+.block-container{
+  padding-top: .25rem !important;
+  padding-bottom: 2rem !important;
+}
+header[data-testid="stHeader"]{
+  background: transparent !important;
+  height: 0px !important;
+}
+div[data-testid="stToolbar"]{
+  visibility: hidden !important;
+  height: 0px !important;
+  position: fixed !important;
 }
 
-/* ---------------- Sidebar premium ---------------- */
+/* --------- Background (joli + léger) --------- */
+.stApp{
+  background:
+    radial-gradient(900px 500px at 10% 0%, rgba(31,111,235,0.18), transparent 55%),
+    radial-gradient(900px 500px at 90% 0%, rgba(11,61,145,0.18), transparent 55%),
+    radial-gradient(700px 420px at 50% 100%, rgba(90,162,255,0.12), transparent 55%),
+    linear-gradient(180deg, #F6F8FC 0%, #F3F6FB 40%, #F6F8FC 100%);
+}
+
+/* --------- Sidebar --------- */
 section[data-testid="stSidebar"]{
-  background: linear-gradient(180deg, #FFFFFF 0%, #FBFCFF 100%);
+  background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(251,252,255,0.96) 100%) !important;
   border-right: 1px solid rgba(230,234,242,0.9);
+  backdrop-filter: blur(10px);
 }
 .sidebar-card{
-  background: #FFFFFF;
+  background: rgba(255,255,255,0.78);
   border: 1px solid rgba(230,234,242,0.95);
   border-radius: 18px;
   padding: 12px 12px;
-  box-shadow: 0 10px 22px rgba(14,30,37,0.05);
+  box-shadow: 0 10px 22px rgba(14,30,37,0.06);
   margin-bottom: 10px;
+  backdrop-filter: blur(8px);
 }
 
-/* ---------------- Header premium ---------------- */
+/* --------- Header premium --------- */
 .iaid-header{
   background: linear-gradient(100deg, #0B3D91 0%, #1F6FEB 55%, #5AA2FF 100%);
   color:#fff;
@@ -118,8 +348,8 @@ section[data-testid="stSidebar"]{
 .iaid-logo{
   width:54px; height:54px;
   border-radius: 16px;
-  background: rgba(255,255,255,0.16);
-  border: 1px solid rgba(255,255,255,0.24);
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.26);
   display:flex; align-items:center; justify-content:center;
   overflow:hidden;
 }
@@ -146,10 +376,45 @@ section[data-testid="stSidebar"]{
   border-radius: 999px;
   font-size: 12px;
   font-weight: 850;
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px);
 }
 
-/* ---------------- Buttons premium ---------------- */
+/* --------- Tabs (pills) --------- */
+div[data-baseweb="tab-list"]{ gap: 8px !important; }
+button[data-baseweb="tab"]{
+  border-radius: 999px !important;
+  padding: 10px 14px !important;
+  font-weight: 850 !important;
+  background: rgba(255,255,255,0.80) !important;
+  border: 1px solid rgba(230,234,242,0.95) !important;
+  box-shadow: 0 10px 22px rgba(14,30,37,0.05);
+  backdrop-filter: blur(8px);
+}
+button[data-baseweb="tab"][aria-selected="true"]{
+  background: linear-gradient(90deg, rgba(11,61,145,0.14), rgba(31,111,235,0.14)) !important;
+  border: 1px solid rgba(31,111,235,0.40) !important;
+}
+
+/* --------- Dataframes (cards) --------- */
+div[data-testid="stDataFrame"]{
+  background: rgba(255,255,255,0.82);
+  border: 1px solid rgba(230,234,242,0.95);
+  border-radius: 20px;
+  padding: 6px;
+  box-shadow: 0 12px 26px rgba(14, 30, 37, 0.06);
+  backdrop-filter: blur(8px);
+}
+
+/* --------- Inputs (selectbox, text, slider) : look plus clean --------- */
+div[data-baseweb="select"] > div,
+div[data-baseweb="input"] > div{
+  border-radius: 14px !important;
+}
+textarea, input{
+  border-radius: 14px !important;
+}
+
+/* --------- Buttons --------- */
 .stDownloadButton button, .stButton button{
   border-radius: 16px !important;
   padding: 10px 14px !important;
@@ -162,31 +427,7 @@ section[data-testid="stSidebar"]{
   box-shadow: 0 14px 30px rgba(14,30,37,0.10);
 }
 
-/* ---------------- Tabs pills ---------------- */
-div[data-baseweb="tab-list"]{ gap: 8px !important; }
-button[data-baseweb="tab"]{
-  border-radius: 999px !important;
-  padding: 10px 14px !important;
-  font-weight: 850 !important;
-  background: #FFFFFF !important;
-  border: 1px solid rgba(230,234,242,0.95) !important;
-  box-shadow: 0 10px 22px rgba(14,30,37,0.04);
-}
-button[data-baseweb="tab"][aria-selected="true"]{
-  background: linear-gradient(90deg, rgba(11,61,145,0.12), rgba(31,111,235,0.12)) !important;
-  border: 1px solid rgba(31,111,235,0.35) !important;
-}
-
-/* ---------------- Dataframes card ---------------- */
-div[data-testid="stDataFrame"]{
-  background: #FFFFFF;
-  border: 1px solid rgba(230,234,242,0.95);
-  border-radius: 20px;
-  padding: 6px;
-  box-shadow: 0 12px 26px rgba(14, 30, 37, 0.05);
-}
-
-/* ---------------- KPI HTML cards ---------------- */
+/* --------- KPI HTML cards --------- */
 .kpi-grid{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -194,13 +435,14 @@ div[data-testid="stDataFrame"]{
   margin-top:6px;
 }
 .kpi{
-  background: linear-gradient(180deg, #FFFFFF 0%, #FBFCFF 100%);
+  background: rgba(255,255,255,0.80);
   border: 1px solid rgba(230,234,242,0.95);
   border-radius: 20px;
   padding: 14px 16px;
   box-shadow: 0 12px 26px rgba(14,30,37,0.07);
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(8px);
 }
 .kpi:before{
   content:"";
@@ -208,23 +450,22 @@ div[data-testid="stDataFrame"]{
   left:0; top:0;
   width:100%; height:3px;
   background: linear-gradient(90deg, #0B3D91 0%, #1F6FEB 55%, #5AA2FF 100%);
-  opacity:.95;
 }
-.kpi .label{ font-weight: 900; opacity:.75; font-size:12px; }
-.kpi .value{ font-weight: 950; font-size:22px; margin-top:6px; }
-.kpi .hint{ margin-top:6px; font-size:12px; opacity:.75; font-weight: 800; }
+.kpi-title{ font-weight: 900; opacity:.75; font-size:12px; }
+.kpi-value{ font-weight: 950; font-size:22px; margin-top:6px; }
 
 .kpi-good:before{ background: linear-gradient(90deg, #1E8E3E, #34A853) !important; }
 .kpi-warn:before{ background: linear-gradient(90deg, #F29900, #F6B100) !important; }
 .kpi-bad:before{ background: linear-gradient(90deg, #D93025, #EA4335) !important; }
 
-/* ---------------- HTML table (badges) ---------------- */
+/* --------- HTML Table (badges) --------- */
 .table-wrap{
   overflow-x:auto;
   border:1px solid rgba(230,234,242,0.95);
   border-radius:20px;
-  background:#fff;
-  box-shadow: 0 12px 26px rgba(14,30,37,0.05);
+  background: rgba(255,255,255,0.84);
+  box-shadow: 0 12px 26px rgba(14,30,37,0.06);
+  backdrop-filter: blur(8px);
 }
 table.iaid-table{
   width:100%;
@@ -243,18 +484,18 @@ table.iaid-table tbody td{
   border-bottom:1px solid rgba(242,244,248,0.95);
   vertical-align: top;
 }
-table.iaid-table tbody tr:hover{ background:#FAFBFE; }
+table.iaid-table tbody tr:hover{ background: rgba(250,251,254,0.75); }
 
-/* Small hover */
-.kpi, .iaid-header, div[data-testid="stDataFrame"]{ transition: transform .12s ease, box-shadow .12s ease; }
+/* --------- Nice hover --------- */
+.kpi, .iaid-header, div[data-testid="stDataFrame"]{
+  transition: transform .12s ease, box-shadow .12s ease;
+}
 .iaid-header:hover{ transform: translateY(-1px); box-shadow: 0 22px 50px rgba(14,30,37,0.18); }
-.kpi:hover{ transform: translateY(-2px); box-shadow: 0 18px 40px rgba(14,30,37,0.11); }
+.kpi:hover{ transform: translateY(-2px); box-shadow: 0 18px 40px rgba(14,30,37,0.12); }
 </style>
 """,
 unsafe_allow_html=True
 )
-
-
 
 
 

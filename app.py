@@ -968,17 +968,6 @@ def build_pdf_report(
 
     doc.build(story)
     return out.getvalue()
-# ===== HEADER PREMIUM =====
-logo_header = st.sidebar.file_uploader("Logo (pour header)", type=["png","jpg","jpeg"], key="logo_header")
-
-import base64
-
-logo_html = "IAID"
-if logo_header is not None:
-    ext = logo_header.name.split(".")[-1].lower()
-    mime = "png" if ext == "png" else "jpeg"
-    logo_b64 = base64.b64encode(logo_header.getvalue()).decode("utf-8")
-    logo_html = f'<img src="data:image/{mime};base64,{logo_b64}" />'
 
 
 now_str = dt.datetime.now().strftime("%d/%m/%Y %H:%M")
@@ -1022,6 +1011,32 @@ def sidebar_card_end():
 
 
 with st.sidebar:
+    import base64
+    logo_header = st.file_uploader(
+        "Logo institutionnel (sidebar + header)",
+        type=["png","jpg","jpeg"],
+        key="logo_header"
+    )
+
+    logo_html = "IAID"   # fallback texte si pas de logo
+
+    if logo_header is not None:
+        ext = logo_header.name.split(".")[-1].lower()
+        mime = "png" if ext == "png" else "jpeg"
+        logo_b64 = base64.b64encode(logo_header.getvalue()).decode("utf-8")
+
+        # ✅ LOGO DANS LA SIDEBAR
+        st.markdown(
+            f"""
+            <div class="sidebar-logo-wrap">
+            <img src="data:image/{mime};base64,{logo_b64}" />
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.divider()
+
     # =========================================================
     # 1) IMPORT & PARAMETRES
     # =========================================================

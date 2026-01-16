@@ -177,16 +177,6 @@ st.markdown(
       .badge-ok{ background:#E9F7EF; color:#145A32; }
       .badge-warn{ background:#FEF5E7; color:#7D6608; }
       .badge-bad{ background:#FDEDEC; color:#922B21; }
-
-            /* Hover cards */
-        .iaid-banner, div[data-testid="stMetric"] > div, .stDataFrame {
-        transition: transform .12s ease, box-shadow .12s ease;
-        }
-        div[data-testid="stMetric"] > div:hover{
-        transform: translateY(-2px);
-        box-shadow: 0 14px 30px rgba(14,30,37,0.10);
-        }
-
     </style>
     """,
     unsafe_allow_html=True

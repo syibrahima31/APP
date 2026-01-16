@@ -17,7 +17,10 @@ from dataclasses import dataclass
 from typing import List, Dict, Tuple, Optional
 import time
 import requests
-
+import smtplib
+from email.message import EmailMessage
+import json
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -365,6 +368,43 @@ def df_to_excel_bytes(sheets: Dict[str, pd.DataFrame]) -> bytes:
             sheet_df.to_excel(writer, sheet_name=name[:31], index=False)
     return output.getvalue()
 
+# -----------------------------
+# Rappel mensuel DG/DGE (Email)
+# -----------------------------
+REMINDER_FILE = Path("last_reminder.json")  # stockage simple
+
+def get_last_reminder_month() -> Optional[str]:
+    if REMINDER_FILE.exists():
+        try:
+            return json.loads(REMINDER_FILE.read_text()).get("month")
+        except Exception:
+            return None
+    return None
+
+def set_last_reminder_month(month_key: str) -> None:
+    REMINDER_FILE.write_text(json.dumps({"month": month_key}))
+
+def send_email_reminder(
+    smtp_host: str,
+    smtp_port: int,
+    smtp_user: str,
+    smtp_pass: str,
+    sender: str,
+    recipients: List[str],
+    subject: str,
+    body: str,) -> None:
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = sender
+    msg["To"] = ", ".join(recipients)
+    msg.set_content(body)
+
+    with smtplib.SMTP(smtp_host, smtp_port, timeout=30) as s:
+        s.starttls()
+        s.login(smtp_user, smtp_pass)
+        s.send_message(msg)
+
+
 def add_badges(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
     def badge(statut: str) -> str:
@@ -631,6 +671,62 @@ with st.sidebar:
     st.divider()
     st.subheader("Export")
     export_prefix = st.text_input("Préfixe nom fichier export", value="Suivi_Classes")
+
+    st.divider()
+    st.subheader("📩 Rappel DG/DGE (mensuel)")
+
+    dashboard_url = st.secrets.get("DASHBOARD_URL", "https://rapportdeptiaid.streamlit.app/")
+    recips_raw = st.secrets.get("DG_EMAILS", "")
+    recipients = [x.strip() for x in recips_raw.split(",") if x.strip()]
+
+    today = dt.date.today()
+    month_key = today.strftime("%Y-%m")  # ex: 2026-01
+
+    last_sent = get_last_reminder_month()
+
+    auto_send = st.checkbox("Auto-envoi 1 fois/mois (à l’ouverture)", value=True)
+
+    subject = f"IAID — Rappel mensuel : consulter le Dashboard ({today.strftime('%m/%Y')})"
+    body = (
+        "Bonjour,\n\n"
+        "Rappel mensuel : merci de consulter le dashboard IAID pour le suivi des enseignements.\n\n"
+        f"Lien : {dashboard_url}\n"
+        f"Date : {dt.datetime.now().strftime('%d/%m/%Y %H:%M')}\n\n"
+        "Cordialement,\n"
+        "Département IA & Ingénierie des Données (IAID)\n"
+    )
+
+    def do_send():
+        send_email_reminder(
+            smtp_host=st.secrets["SMTP_HOST"],
+            smtp_port=int(st.secrets["SMTP_PORT"]),
+            smtp_user=st.secrets["SMTP_USER"],
+            smtp_pass=st.secrets["SMTP_PASS"],
+            sender=st.secrets["SMTP_FROM"],
+            recipients=recipients,
+            subject=subject,
+            body=body,
+        )
+        set_last_reminder_month(month_key)
+
+    if st.button("Envoyer le rappel maintenant"):
+        if not recipients:
+            st.error("DG_EMAILS est vide dans st.secrets.")
+        else:
+            try:
+                do_send()
+                st.success("Rappel envoyé ✅")
+            except Exception as e:
+                st.error(f"Erreur envoi: {e}")
+
+    if auto_send and (last_sent != month_key) and recipients:
+        st.info("Auto-rappel : pas encore envoyé ce mois-ci → envoi maintenant.")
+        try:
+            do_send()
+            st.success("Rappel mensuel envoyé automatiquement ✅")
+        except Exception as e:
+            st.error(f"Auto-envoi échoué: {e}")
+
 
 
 thresholds = {"taux_vert": taux_vert, "taux_orange": taux_orange, "ecart_critique": ecart_critique}

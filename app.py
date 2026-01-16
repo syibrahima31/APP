@@ -45,67 +45,45 @@ st.markdown(
 """
 <style>
 /* =========================================================
-   THEME "PREMIUM IAID" — Moderne, clean, dashboard pro
+   IAID PREMIUM THEME (Header + KPI + Sidebar cards)
    ========================================================= */
 
-/* ---------- Top padding / header Streamlit ---------- */
-.block-container{
-  padding-top: 0.20rem !important;
-  padding-bottom: 2.0rem !important;
-}
-header[data-testid="stHeader"]{
-  background: transparent !important;
-  height: 0px !important;
-}
-div[data-testid="stToolbar"]{
-  visibility: hidden !important;
-  height: 0px !important;
-  position: fixed !important;
-}
+.block-container{ padding-top: .20rem !important; padding-bottom: 2rem !important; }
+header[data-testid="stHeader"]{ background: transparent !important; height: 0px !important; }
+div[data-testid="stToolbar"]{ visibility: hidden !important; height: 0px !important; position: fixed !important; }
 
-/* ---------- Global background ---------- */
 .stApp{
   background: radial-gradient(1200px 600px at 10% 0%, rgba(31,111,235,0.10), transparent 55%),
               radial-gradient(1200px 600px at 90% 0%, rgba(11,61,145,0.10), transparent 55%),
               #F6F8FC;
 }
 
-/* =========================================================
-   SIDEBAR PREMIUM
-   ========================================================= */
+/* ---------------- Sidebar premium ---------------- */
 section[data-testid="stSidebar"]{
   background: linear-gradient(180deg, #FFFFFF 0%, #FBFCFF 100%);
   border-right: 1px solid rgba(230,234,242,0.9);
 }
-section[data-testid="stSidebar"] *{
-  font-size: 0.95rem;
-}
-section[data-testid="stSidebar"] h1,
-section[data-testid="stSidebar"] h2,
-section[data-testid="stSidebar"] h3{
-  letter-spacing: 0.2px;
-}
-
-/* Blocs internes sidebar (léger relief) */
-section[data-testid="stSidebar"] .block-container{
-  padding-top: 1rem !important;
+.sidebar-card{
+  background: #FFFFFF;
+  border: 1px solid rgba(230,234,242,0.95);
+  border-radius: 18px;
+  padding: 12px 12px;
+  box-shadow: 0 10px 22px rgba(14,30,37,0.05);
+  margin-bottom: 10px;
 }
 
-/* =========================================================
-   BANNER IAID (glass + gradient)
-   ========================================================= */
-.iaid-banner{
-  margin-top: 0px !important;
+/* ---------------- Header premium ---------------- */
+.iaid-header{
   background: linear-gradient(100deg, #0B3D91 0%, #1F6FEB 55%, #5AA2FF 100%);
-  color: #fff;
-  padding: 20px 22px;
+  color:#fff;
+  padding: 18px 20px;
   border-radius: 22px;
-  box-shadow: 0 18px 40px rgba(14, 30, 37, 0.14);
-  margin: 0 0 16px 0;
+  box-shadow: 0 18px 40px rgba(14,30,37,0.14);
   position: relative;
-  overflow: hidden;
+  overflow:hidden;
+  margin: 0 0 14px 0;
 }
-.iaid-banner:before{
+.iaid-header:before{
   content:"";
   position:absolute;
   top:-45%;
@@ -115,7 +93,7 @@ section[data-testid="stSidebar"] .block-container{
   transform: rotate(18deg);
   background: rgba(255,255,255,0.10);
 }
-.iaid-banner:after{
+.iaid-header:after{
   content:"";
   position:absolute;
   right:-120px;
@@ -124,20 +102,35 @@ section[data-testid="stSidebar"] .block-container{
   height:260px;
   border-radius: 50%;
   background: rgba(255,255,255,0.10);
-  filter: blur(1px);
 }
-.iaid-banner .title{
-  font-size: 20px;
-  font-weight: 950;
-  letter-spacing: 0.3px;
-  position: relative;
+.iaid-hrow{
+  display:flex;
+  gap:14px;
+  align-items:center;
+  justify-content: space-between;
+  position:relative;
 }
-.iaid-banner .subtitle{
-  font-size: 13px;
-  opacity: 0.95;
-  margin-top: 7px;
-  position: relative;
-  line-height: 1.35;
+.iaid-hleft{
+  display:flex;
+  gap:14px;
+  align-items:center;
+}
+.iaid-logo{
+  width:54px; height:54px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.16);
+  border: 1px solid rgba(255,255,255,0.24);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.iaid-logo img{ width:100%; height:100%; object-fit:cover; }
+.iaid-htitle{ font-size: 20px; font-weight: 950; letter-spacing:.3px; }
+.iaid-hsub{ margin-top:6px; font-size: 13px; opacity:.95; line-height:1.35; }
+.iaid-meta{
+  text-align:right;
+  font-size:12px;
+  opacity:.95;
+  font-weight: 800;
 }
 .iaid-badges{
   margin-top: 12px;
@@ -156,87 +149,7 @@ section[data-testid="stSidebar"] .block-container{
   backdrop-filter: blur(6px);
 }
 
-/* =========================================================
-   TITRES / SECTIONS
-   ========================================================= */
-h1, h2, h3{
-  letter-spacing: 0.2px;
-}
-hr{
-  border: none;
-  height: 1px;
-  background: rgba(230,234,242,0.9);
-}
-
-/* =========================================================
-   KPI CARDS (st.metric) — premium cards
-   ========================================================= */
-div[data-testid="stMetric"]{
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-}
-div[data-testid="stMetric"] > div{
-  background: linear-gradient(180deg, #FFFFFF 0%, #FBFCFF 100%);
-  border: 1px solid rgba(230,234,242,0.95);
-  padding: 14px 16px;
-  border-radius: 20px;
-  box-shadow: 0 12px 26px rgba(14, 30, 37, 0.07);
-  position: relative;
-  overflow: hidden;
-}
-div[data-testid="stMetric"] > div:before{
-  content:"";
-  position:absolute;
-  left:0;
-  top:0;
-  width:100%;
-  height:3px;
-  background: linear-gradient(90deg, #0B3D91 0%, #1F6FEB 55%, #5AA2FF 100%);
-  opacity: 0.9;
-}
-div[data-testid="stMetricLabel"] p{
-  font-weight: 850 !important;
-  opacity: 0.78;
-}
-div[data-testid="stMetricValue"]{
-  font-weight: 950 !important;
-}
-
-/* =========================================================
-   TABS — style "pills"
-   ========================================================= */
-div[data-baseweb="tab-list"]{
-  gap: 8px !important;
-}
-button[data-baseweb="tab"]{
-  border-radius: 999px !important;
-  padding: 10px 14px !important;
-  font-weight: 850 !important;
-  letter-spacing: 0.15px;
-  background: #FFFFFF !important;
-  border: 1px solid rgba(230,234,242,0.95) !important;
-  box-shadow: 0 10px 22px rgba(14,30,37,0.04);
-}
-button[data-baseweb="tab"][aria-selected="true"]{
-  background: linear-gradient(90deg, rgba(11,61,145,0.12), rgba(31,111,235,0.12)) !important;
-  border: 1px solid rgba(31,111,235,0.35) !important;
-}
-
-/* =========================================================
-   DATAFRAMES — card look
-   ========================================================= */
-div[data-testid="stDataFrame"]{
-  background: #FFFFFF;
-  border: 1px solid rgba(230,234,242,0.95);
-  border-radius: 20px;
-  padding: 6px;
-  box-shadow: 0 12px 26px rgba(14, 30, 37, 0.05);
-}
-
-/* =========================================================
-   BUTTONS — premium
-   ========================================================= */
+/* ---------------- Buttons premium ---------------- */
 .stDownloadButton button, .stButton button{
   border-radius: 16px !important;
   padding: 10px 14px !important;
@@ -249,46 +162,63 @@ div[data-testid="stDataFrame"]{
   box-shadow: 0 14px 30px rgba(14,30,37,0.10);
 }
 
-/* =========================================================
-   BADGES
-   ========================================================= */
-.badge{
-  display:inline-block;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-weight: 900;
-  font-size: 12px;
-  border: 1px solid rgba(230,234,242,0.95);
-  white-space: nowrap;
+/* ---------------- Tabs pills ---------------- */
+div[data-baseweb="tab-list"]{ gap: 8px !important; }
+button[data-baseweb="tab"]{
+  border-radius: 999px !important;
+  padding: 10px 14px !important;
+  font-weight: 850 !important;
+  background: #FFFFFF !important;
+  border: 1px solid rgba(230,234,242,0.95) !important;
+  box-shadow: 0 10px 22px rgba(14,30,37,0.04);
 }
-.badge-ok{ background:#E9F7EF; color:#145A32; }
-.badge-warn{ background:#FEF5E7; color:#7D6608; }
-.badge-bad{ background:#FDEDEC; color:#922B21; }
+button[data-baseweb="tab"][aria-selected="true"]{
+  background: linear-gradient(90deg, rgba(11,61,145,0.12), rgba(31,111,235,0.12)) !important;
+  border: 1px solid rgba(31,111,235,0.35) !important;
+}
 
-/* =========================================================
-   HOVER EFFECTS (cards + dataframes + banner)
-   ========================================================= */
-.iaid-banner,
-div[data-testid="stMetric"] > div,
+/* ---------------- Dataframes card ---------------- */
 div[data-testid="stDataFrame"]{
-  transition: transform .12s ease, box-shadow .12s ease;
-}
-.iaid-banner:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 22px 50px rgba(14, 30, 37, 0.18);
-}
-div[data-testid="stMetric"] > div:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 18px 40px rgba(14,30,37,0.11);
-}
-div[data-testid="stDataFrame"]:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 16px 34px rgba(14,30,37,0.09);
+  background: #FFFFFF;
+  border: 1px solid rgba(230,234,242,0.95);
+  border-radius: 20px;
+  padding: 6px;
+  box-shadow: 0 12px 26px rgba(14, 30, 37, 0.05);
 }
 
-/* =========================================================
-   HTML TABLE (badges) — premium
-   ========================================================= */
+/* ---------------- KPI HTML cards ---------------- */
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:12px;
+  margin-top:6px;
+}
+.kpi{
+  background: linear-gradient(180deg, #FFFFFF 0%, #FBFCFF 100%);
+  border: 1px solid rgba(230,234,242,0.95);
+  border-radius: 20px;
+  padding: 14px 16px;
+  box-shadow: 0 12px 26px rgba(14,30,37,0.07);
+  position: relative;
+  overflow: hidden;
+}
+.kpi:before{
+  content:"";
+  position:absolute;
+  left:0; top:0;
+  width:100%; height:3px;
+  background: linear-gradient(90deg, #0B3D91 0%, #1F6FEB 55%, #5AA2FF 100%);
+  opacity:.95;
+}
+.kpi .label{ font-weight: 900; opacity:.75; font-size:12px; }
+.kpi .value{ font-weight: 950; font-size:22px; margin-top:6px; }
+.kpi .hint{ margin-top:6px; font-size:12px; opacity:.75; font-weight: 800; }
+
+.kpi-good:before{ background: linear-gradient(90deg, #1E8E3E, #34A853) !important; }
+.kpi-warn:before{ background: linear-gradient(90deg, #F29900, #F6B100) !important; }
+.kpi-bad:before{ background: linear-gradient(90deg, #D93025, #EA4335) !important; }
+
+/* ---------------- HTML table (badges) ---------------- */
 .table-wrap{
   overflow-x:auto;
   border:1px solid rgba(230,234,242,0.95);
@@ -313,9 +243,12 @@ table.iaid-table tbody td{
   border-bottom:1px solid rgba(242,244,248,0.95);
   vertical-align: top;
 }
-table.iaid-table tbody tr:hover{
-  background:#FAFBFE;
-}
+table.iaid-table tbody tr:hover{ background:#FAFBFE; }
+
+/* Small hover */
+.kpi, .iaid-header, div[data-testid="stDataFrame"]{ transition: transform .12s ease, box-shadow .12s ease; }
+.iaid-header:hover{ transform: translateY(-1px); box-shadow: 0 22px 50px rgba(14,30,37,0.18); }
+.kpi:hover{ transform: translateY(-2px); box-shadow: 0 18px 40px rgba(14,30,37,0.11); }
 </style>
 """,
 unsafe_allow_html=True
@@ -325,17 +258,21 @@ unsafe_allow_html=True
 
 st.markdown(
     """
-    <div class="iaid-banner">
-      <div class="title">Département IA &amp; Ingénierie des Données (IAID)</div>
-      <div class="subtitle">
+<div class="iaid-hero">
+  <div class="iaid-hero-top">
+    <div>
+      <div class="iaid-hero-title">Département IA &amp; Ingénierie des Données (IAID)</div>
+      <div class="iaid-hero-sub">
         Tableau de bord de pilotage mensuel — Suivi des enseignements par classe &amp; par matière
       </div>
-      <div class="iaid-badges">
-        <div class="iaid-badge">Excel multi-feuilles → Consolidation automatique</div>
-        <div class="iaid-badge">KPIs • Alertes • Qualité</div>
-        <div class="iaid-badge">Exports : PDF officiel + Excel consolidé</div>
+      <div class="iaid-chip-row">
+        <div class="iaid-chip">Excel multi-feuilles → consolidation automatique</div>
+        <div class="iaid-chip">KPIs • Alertes • Qualité</div>
+        <div class="iaid-chip">Exports : PDF officiel + Excel consolidé</div>
       </div>
     </div>
+  </div>
+</div>
     """,
     unsafe_allow_html=True
 )
@@ -745,25 +682,78 @@ def build_pdf_report(
 
     doc.build(story)
     return out.getvalue()
+# ===== HEADER PREMIUM =====
+logo_header = st.sidebar.file_uploader("Logo (pour header)", type=["png","jpg","jpeg"], key="logo_header")
+
+logo_html = ""
+if logo_header is not None:
+    import base64
+    logo_b64 = base64.b64encode(logo_header.getvalue()).decode("utf-8")
+    logo_html = f'<img src="data:image/png;base64,{logo_b64}" />'
+else:
+    # fallback sans image
+    logo_html = "IAID"
+
+now_str = dt.datetime.now().strftime("%d/%m/%Y %H:%M")
+
+st.markdown(
+f"""
+<div class="iaid-header">
+  <div class="iaid-hrow">
+    <div class="iaid-hleft">
+      <div class="iaid-logo">{logo_html}</div>
+      <div>
+        <div class="iaid-htitle">Département IA &amp; Ingénierie des Données (IAID)</div>
+        <div class="iaid-hsub">Tableau de bord de pilotage mensuel — Suivi des enseignements par classe &amp; par matière</div>
+      </div>
+    </div>
+    <div class="iaid-meta">
+      <div>Dernière mise à jour</div>
+      <div style="font-size:13px;font-weight:950;">{now_str}</div>
+    </div>
+  </div>
+
+  <div class="iaid-badges">
+    <div class="iaid-badge">Excel multi-feuilles → Consolidation automatique</div>
+    <div class="iaid-badge">KPIs • Alertes • Qualité</div>
+    <div class="iaid-badge">Exports : PDF officiel + Excel consolidé</div>
+  </div>
+</div>
+""",
+unsafe_allow_html=True
+)
 
 # -----------------------------
 # UI
 # -----------------------------
 st.markdown("### 📊 Suivi mensuel des enseignements")
 st.caption("Consolidation automatique à partir des feuilles Excel (1 feuille = 1 classe).")
+def sidebar_card(title: str):
+    st.markdown(f'<div class="sidebar-card"><div style="font-weight:950;font-size:14px;margin-bottom:10px;">{title}</div>', unsafe_allow_html=True)
+
+def sidebar_card_end():
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 with st.sidebar:
-    st.header("Import & Paramètres")
+    # =========================================================
+    # 1) IMPORT & PARAMETRES
+    # =========================================================
+    sidebar_card("Import & Paramètres")
 
-    # --- MODE STREAMLIT CLOUD (URL auto + upload manuel) ---
     import_mode = st.radio("Mode d'import", ["URL (auto)", "Upload (manuel)"], index=0)
 
     file_bytes = None
     source_label = None
 
-    # Auto-refresh
-    st.subheader("Auto-refresh")
+    st.caption("Chaque feuille = une classe. Colonnes attendues : Matière, VHP, Oct..Mai (au minimum).")
+    sidebar_card_end()
+
+    # =========================================================
+    # 2) AUTO-REFRESH + CHARGEMENT (URL / UPLOAD)
+    # =========================================================
+    sidebar_card("Auto-refresh & Source")
+
     auto_refresh = st.checkbox("Rafraîchir automatiquement (URL)", value=True)
     refresh_sec = st.slider("Intervalle (secondes)", 30, 900, 120, 30)
 
@@ -787,10 +777,13 @@ with st.sidebar:
             file_bytes = uploaded.getvalue()
             source_label = f"Upload: {uploaded.name}"
 
-    st.caption("Chaque feuille = une classe. Colonnes attendues : Matière, VHP, Oct..Mai (au minimum).")
+    sidebar_card_end()
 
-    # Période
-    st.subheader("Période couverte")
+    # =========================================================
+    # 3) PERIODE COUVERTE
+    # =========================================================
+    sidebar_card("Période couverte")
+
     mois_min, mois_max = st.select_slider(
         "Mois (de → à)",
         options=MOIS_COLS,
@@ -798,22 +791,56 @@ with st.sidebar:
     )
     mois_couverts = MOIS_COLS[MOIS_COLS.index(mois_min): MOIS_COLS.index(mois_max) + 1]
 
-    # Seuils
-    st.subheader("Seuils d’alerte")
-    taux_vert = st.slider("Seuil Vert (Terminé/OK)", 0.50, 1.00, float(DEFAULT_THRESHOLDS["taux_vert"]), 0.05)
-    taux_orange = st.slider("Seuil Orange (Attention)", 0.10, 0.95, float(DEFAULT_THRESHOLDS["taux_orange"]), 0.05)
-    ecart_critique = st.slider("Écart critique (heures)", -40, 0, int(DEFAULT_THRESHOLDS["ecart_critique"]), 1)
+    sidebar_card_end()
 
-    # Branding
-    st.subheader("Branding")
+    # =========================================================
+    # 4) SEUILS D’ALERTE
+    # =========================================================
+    sidebar_card("Seuils d’alerte")
+
+    taux_vert = st.slider(
+        "Seuil Vert (Terminé/OK)",
+        0.50, 1.00,
+        float(DEFAULT_THRESHOLDS["taux_vert"]),
+        0.05
+    )
+    taux_orange = st.slider(
+        "Seuil Orange (Attention)",
+        0.10, 0.95,
+        float(DEFAULT_THRESHOLDS["taux_orange"]),
+        0.05
+    )
+    ecart_critique = st.slider(
+        "Écart critique (heures)",
+        -40, 0,
+        int(DEFAULT_THRESHOLDS["ecart_critique"]),
+        1
+    )
+
+    sidebar_card_end()
+
+    # =========================================================
+    # 5) BRANDING
+    # =========================================================
+    sidebar_card("Branding")
+
     logo = st.file_uploader("Logo (PNG/JPG) pour le PDF", type=["png", "jpg", "jpeg"])
 
-    st.divider()
-    st.subheader("Export")
+    sidebar_card_end()
+
+    # =========================================================
+    # 6) EXPORT
+    # =========================================================
+    sidebar_card("Exports")
+
     export_prefix = st.text_input("Préfixe nom fichier export", value="Suivi_Classes")
 
-    st.divider()
-    st.subheader("📩 Rappel DG/DGE (mensuel)")
+    sidebar_card_end()
+
+    # =========================================================
+    # 7) RAPPEL DG/DGE (MENSUEL)
+    # =========================================================
+    sidebar_card("📩 Rappel DG/DGE (mensuel)")
 
     dashboard_url = st.secrets.get("DASHBOARD_URL", "https://rapportdeptiaid.streamlit.app/")
     recips_raw = st.secrets.get("DG_EMAILS", "")
@@ -821,7 +848,6 @@ with st.sidebar:
 
     today = dt.date.today()
     month_key = today.strftime("%Y-%m")  # ex: 2026-01
-
     last_sent = get_last_reminder_month()
 
     auto_send = st.checkbox("Auto-envoi 1 fois/mois (à l’ouverture)", value=True)
@@ -866,6 +892,8 @@ with st.sidebar:
             st.success("Rappel mensuel envoyé automatiquement ✅")
         except Exception as e:
             st.error(f"Auto-envoi échoué: {e}")
+
+    sidebar_card_end()
 
 
 
@@ -1020,30 +1048,41 @@ with tab_overview:
     retard_total = float(filtered.loc[filtered["Écart"] < 0, "Écart"].sum()) if total else 0.0
 
     # ----- KPI en cartes HTML (NOTE: f""" ... """ obligatoire) -----
+    # --- Choix couleur retard ---
+    retard_class = "kpi-good"
+    if retard_total < 0:
+        retard_class = "kpi-bad"
+    elif retard_total == 0:
+        retard_class = "kpi-warn"
+
     st.markdown(
         f"""
-        <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:6px;">
-          <div style="background:#fff;border:1px solid #E6EAF2;border-radius:18px;padding:14px 16px;box-shadow:0 10px 24px rgba(14,30,37,0.06);">
-            <div style="font-weight:900;opacity:.75;font-size:12px;">Matières</div>
-            <div style="font-weight:950;font-size:22px;margin-top:6px;">{total}</div>
-          </div>
-          <div style="background:#fff;border:1px solid #E6EAF2;border-radius:18px;padding:14px 16px;box-shadow:0 10px 24px rgba(14,30,37,0.06);">
-            <div style="font-weight:900;opacity:.75;font-size:12px;">Taux moyen</div>
-            <div style="font-weight:950;font-size:22px;margin-top:6px;">{taux_moy:.1f}%</div>
-          </div>
-          <div style="background:#fff;border:1px solid #E6EAF2;border-radius:18px;padding:14px 16px;box-shadow:0 10px 24px rgba(14,30,37,0.06);">
-            <div style="font-weight:900;opacity:.75;font-size:12px;">Terminées</div>
-            <div style="font-weight:950;font-size:22px;margin-top:6px;">{nb_term}</div>
-          </div>
-          <div style="background:#fff;border:1px solid #E6EAF2;border-radius:18px;padding:14px 16px;box-shadow:0 10px 24px rgba(14,30,37,0.06);">
-            <div style="font-weight:900;opacity:.75;font-size:12px;">En cours</div>
-            <div style="font-weight:950;font-size:22px;margin-top:6px;">{nb_enc}</div>
-          </div>
-          <div style="background:#fff;border:1px solid #E6EAF2;border-radius:18px;padding:14px 16px;box-shadow:0 10px 24px rgba(14,30,37,0.06);">
-            <div style="font-weight:900;opacity:.75;font-size:12px;">Retard cumulé (h)</div>
-            <div style="font-weight:950;font-size:22px;margin-top:6px;">{retard_total:.0f}</div>
-          </div>
-        </div>
+    <div class="kpi-grid">
+    <div class="kpi kpi-good">
+        <div class="kpi-title">Matières</div>
+        <div class="kpi-value">{total}</div>
+    </div>
+
+    <div class="kpi kpi-warn">
+        <div class="kpi-title">Taux moyen</div>
+        <div class="kpi-value">{taux_moy:.1f}%</div>
+    </div>
+
+    <div class="kpi kpi-good">
+        <div class="kpi-title">Terminées</div>
+        <div class="kpi-value">{nb_term}</div>
+    </div>
+
+    <div class="kpi kpi-warn">
+        <div class="kpi-title">En cours</div>
+        <div class="kpi-value">{nb_enc}</div>
+    </div>
+
+    <div class="kpi {retard_class}">
+        <div class="kpi-title">Retard cumulé (h)</div>
+        <div class="kpi-value">{retard_total:.0f}</div>
+    </div>
+    </div>
         """,
         unsafe_allow_html=True
     )

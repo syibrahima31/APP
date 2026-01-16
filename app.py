@@ -41,17 +41,6 @@ st.set_page_config(
     page_icon="📊",
 )
 
-# =========================
-# THEME SWITCH (DG Clair / DG Sombre)
-# =========================
-if "dg_dark" not in st.session_state:
-    st.session_state.dg_dark = False  # défaut : Clair
-
-with st.sidebar:
-    st.markdown("### 🎛️ Thème")
-    st.toggle("Mode DG Sombre", key="dg_dark", help="Basculer entre thème clair et sombre (lisible partout).")
-
-DG_DARK = bool(st.session_state.dg_dark)
 
 
 # st.markdown(

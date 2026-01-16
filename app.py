@@ -346,7 +346,22 @@ section[data-testid="stSidebar"]{
   margin-bottom: 10px;
   box-shadow: 0 6px 18px rgba(14,30,37,0.05);
 }
-
+/* ---- LOGO SIDEBAR ---- */
+.sidebar-logo-wrap{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin: 8px 0 14px 0;
+}
+.sidebar-logo-wrap img{
+  width: 120px;         /* ajuste: 90 / 110 / 130 */
+  max-width: 100%;
+  height: auto;
+  border-radius: 14px;  /* effet premium */
+  border: 1px solid rgba(227,232,240,0.9);
+  box-shadow: 0 10px 24px rgba(14,30,37,0.08);
+  background: #fff;
+  padding: 6px;
 /* -----------------------------
    INPUTS (lisibilité ++)
 ------------------------------*/
@@ -541,6 +556,8 @@ div[data-testid="stAlert"] *{
 @media (max-width: 520px){
   .kpi-grid{ grid-template-columns: 1fr; }
 }
+
+
 </style>
 """,
 unsafe_allow_html=True

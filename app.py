@@ -1193,7 +1193,7 @@ f"""
 <div class="iaid-header">
   <div class="iaid-hrow">
     <div class="iaid-hleft">
-      <div class="iaid-logo">{logo_html}</div>
+        <div class="iaid-logo">IAID</div>
       <div>
         <div class="iaid-htitle">Département IA &amp; Ingénierie des Données (IAID)</div>
         <div class="iaid-hsub">Tableau de bord de pilotage mensuel — Suivi des enseignements par classe &amp; par matière</div>

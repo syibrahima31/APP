@@ -356,15 +356,23 @@ section[data-testid="stSidebar"]{
   align-items:center;
   margin: 8px 0 14px 0;
 }
+.sidebar-logo-wrap{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 18px 0 20px 0;
+}
+
 .sidebar-logo-wrap img{
-  width: 120px;         /* ajuste: 90 / 110 / 130 */
+  width: 170px;        /* ⬅️ PLUS GRAND */
   max-width: 100%;
   height: auto;
-  border-radius: 14px;  /* effet premium */
+  border-radius: 18px;
   border: 1px solid rgba(227,232,240,0.9);
-  box-shadow: 0 10px 24px rgba(14,30,37,0.08);
-  background: #fff;
-  padding: 6px;}
+  background: #FFFFFF;
+  padding: 8px;
+  box-shadow: 0 14px 32px rgba(14,30,37,0.12);
+}
 /* -----------------------------
    INPUTS (lisibilité ++)
 ------------------------------*/
@@ -986,16 +994,24 @@ def sidebar_card_end():
 with st.sidebar:
     from pathlib import Path
 
-    LOGO_PATH = Path("assets/logo_iaid.jpg")  # ou .jpeg
+    LOGO_JPG = Path("assets/logo_iaid.jpg")
 
-    if not LOGO_PATH.exists():
-        st.error("❌ Logo manquant : assets/logo_iaid.jpg")
-    else:
+    if LOGO_JPG.exists():
         st.markdown('<div class="sidebar-logo-wrap">', unsafe_allow_html=True)
-        st.image(str(LOGO_PATH), width=130)
+        st.image(str(LOGO_JPG))
         st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        st.markdown(
+            """
+            <div class="sidebar-logo-wrap" style="font-weight:950;color:#0B3D91;font-size:18px;">
+            IAID
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     st.divider()
+
 
 
     # =========================================================

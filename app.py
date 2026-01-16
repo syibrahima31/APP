@@ -45,156 +45,212 @@ st.markdown(
 """
 <style>
 /* =========================================================
-   0) RESET / TOP SPACE STREAMLIT
+   THEME "PREMIUM IAID" — Moderne, clean, dashboard pro
    ========================================================= */
 
-/* Retire l'espace inutile au-dessus */
+/* ---------- Top padding / header Streamlit ---------- */
 .block-container{
-  padding-top: 0.25rem !important;
+  padding-top: 0.20rem !important;
   padding-bottom: 2.0rem !important;
 }
-
-/* Neutralise la barre header Streamlit */
 header[data-testid="stHeader"]{
   background: transparent !important;
   height: 0px !important;
 }
-
-/* Optionnel : cache aussi le petit espace du toolbar si présent (selon version) */
 div[data-testid="stToolbar"]{
   visibility: hidden !important;
   height: 0px !important;
   position: fixed !important;
 }
 
-/* =========================================================
-   1) GLOBAL
-   ========================================================= */
+/* ---------- Global background ---------- */
 .stApp{
-  background: #F6F8FC;
-}
-
-/* Sidebar */
-section[data-testid="stSidebar"]{
-  background: #FFFFFF;
-  border-right: 1px solid #E6EAF2;
+  background: radial-gradient(1200px 600px at 10% 0%, rgba(31,111,235,0.10), transparent 55%),
+              radial-gradient(1200px 600px at 90% 0%, rgba(11,61,145,0.10), transparent 55%),
+              #F6F8FC;
 }
 
 /* =========================================================
-   2) BANNER IAID
+   SIDEBAR PREMIUM
+   ========================================================= */
+section[data-testid="stSidebar"]{
+  background: linear-gradient(180deg, #FFFFFF 0%, #FBFCFF 100%);
+  border-right: 1px solid rgba(230,234,242,0.9);
+}
+section[data-testid="stSidebar"] *{
+  font-size: 0.95rem;
+}
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3{
+  letter-spacing: 0.2px;
+}
+
+/* Blocs internes sidebar (léger relief) */
+section[data-testid="stSidebar"] .block-container{
+  padding-top: 1rem !important;
+}
+
+/* =========================================================
+   BANNER IAID (glass + gradient)
    ========================================================= */
 .iaid-banner{
   margin-top: 0px !important;
-  background: linear-gradient(90deg, #0B3D91 0%, #1F6FEB 100%);
-  color: white;
-  padding: 18px 20px;
-  border-radius: 20px;
-  box-shadow: 0 12px 28px rgba(14, 30, 37, 0.12);
+  background: linear-gradient(100deg, #0B3D91 0%, #1F6FEB 55%, #5AA2FF 100%);
+  color: #fff;
+  padding: 20px 22px;
+  border-radius: 22px;
+  box-shadow: 0 18px 40px rgba(14, 30, 37, 0.14);
   margin: 0 0 16px 0;
   position: relative;
   overflow: hidden;
 }
-
 .iaid-banner:before{
   content:"";
   position:absolute;
-  top:-40%;
-  left:-20%;
-  width:60%;
-  height:200%;
-  transform: rotate(20deg);
+  top:-45%;
+  left:-25%;
+  width:70%;
+  height:220%;
+  transform: rotate(18deg);
   background: rgba(255,255,255,0.10);
 }
-
+.iaid-banner:after{
+  content:"";
+  position:absolute;
+  right:-120px;
+  top:-120px;
+  width:260px;
+  height:260px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.10);
+  filter: blur(1px);
+}
 .iaid-banner .title{
   font-size: 20px;
-  font-weight: 900;
-  letter-spacing: 0.2px;
+  font-weight: 950;
+  letter-spacing: 0.3px;
   position: relative;
 }
-
 .iaid-banner .subtitle{
   font-size: 13px;
   opacity: 0.95;
-  margin-top: 6px;
+  margin-top: 7px;
   position: relative;
+  line-height: 1.35;
 }
-
 .iaid-badges{
   margin-top: 12px;
-  display: flex;
+  display:flex;
   gap: 8px;
   flex-wrap: wrap;
   position: relative;
 }
-
 .iaid-badge{
   background: rgba(255,255,255,0.16);
-  border: 1px solid rgba(255,255,255,0.22);
+  border: 1px solid rgba(255,255,255,0.24);
   padding: 6px 10px;
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 800;
-  backdrop-filter: blur(4px);
+  font-weight: 850;
+  backdrop-filter: blur(6px);
 }
 
 /* =========================================================
-   3) KPI CARDS (st.metric)
+   TITRES / SECTIONS
+   ========================================================= */
+h1, h2, h3{
+  letter-spacing: 0.2px;
+}
+hr{
+  border: none;
+  height: 1px;
+  background: rgba(230,234,242,0.9);
+}
+
+/* =========================================================
+   KPI CARDS (st.metric) — premium cards
    ========================================================= */
 div[data-testid="stMetric"]{
   background: transparent !important;
   border: none !important;
   padding: 0 !important;
 }
-
 div[data-testid="stMetric"] > div{
-  background: #FFFFFF;
-  border: 1px solid #E6EAF2;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FBFCFF 100%);
+  border: 1px solid rgba(230,234,242,0.95);
   padding: 14px 16px;
-  border-radius: 18px;
-  box-shadow: 0 10px 24px rgba(14, 30, 37, 0.06);
+  border-radius: 20px;
+  box-shadow: 0 12px 26px rgba(14, 30, 37, 0.07);
+  position: relative;
+  overflow: hidden;
 }
-
+div[data-testid="stMetric"] > div:before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:3px;
+  background: linear-gradient(90deg, #0B3D91 0%, #1F6FEB 55%, #5AA2FF 100%);
+  opacity: 0.9;
+}
 div[data-testid="stMetricLabel"] p{
-  font-weight: 800 !important;
-  opacity: 0.85;
+  font-weight: 850 !important;
+  opacity: 0.78;
 }
-
 div[data-testid="stMetricValue"]{
-  font-weight: 900 !important;
+  font-weight: 950 !important;
 }
 
 /* =========================================================
-   4) TABS
+   TABS — style "pills"
    ========================================================= */
+div[data-baseweb="tab-list"]{
+  gap: 8px !important;
+}
 button[data-baseweb="tab"]{
-  font-weight: 800 !important;
-  letter-spacing: 0.2px;
+  border-radius: 999px !important;
+  padding: 10px 14px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.15px;
+  background: #FFFFFF !important;
+  border: 1px solid rgba(230,234,242,0.95) !important;
+  box-shadow: 0 10px 22px rgba(14,30,37,0.04);
+}
+button[data-baseweb="tab"][aria-selected="true"]{
+  background: linear-gradient(90deg, rgba(11,61,145,0.12), rgba(31,111,235,0.12)) !important;
+  border: 1px solid rgba(31,111,235,0.35) !important;
 }
 
 /* =========================================================
-   5) DATAFRAMES / TABLES STREAMLIT
+   DATAFRAMES — card look
    ========================================================= */
 div[data-testid="stDataFrame"]{
   background: #FFFFFF;
-  border: 1px solid #E6EAF2;
-  border-radius: 18px;
+  border: 1px solid rgba(230,234,242,0.95);
+  border-radius: 20px;
   padding: 6px;
-  box-shadow: 0 10px 24px rgba(14, 30, 37, 0.04);
+  box-shadow: 0 12px 26px rgba(14, 30, 37, 0.05);
 }
 
 /* =========================================================
-   6) BUTTONS (download + normal)
+   BUTTONS — premium
    ========================================================= */
-.stDownloadButton button,
-.stButton button{
-  border-radius: 14px !important;
+.stDownloadButton button, .stButton button{
+  border-radius: 16px !important;
   padding: 10px 14px !important;
-  font-weight: 800 !important;
+  font-weight: 850 !important;
+  border: 1px solid rgba(230,234,242,0.95) !important;
+  box-shadow: 0 10px 22px rgba(14,30,37,0.06);
+}
+.stDownloadButton button:hover, .stButton button:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(14,30,37,0.10);
 }
 
 /* =========================================================
-   7) BADGES (HTML)
+   BADGES
    ========================================================= */
 .badge{
   display:inline-block;
@@ -202,65 +258,61 @@ div[data-testid="stDataFrame"]{
   border-radius: 999px;
   font-weight: 900;
   font-size: 12px;
-  border: 1px solid #E6EAF2;
+  border: 1px solid rgba(230,234,242,0.95);
   white-space: nowrap;
 }
-
 .badge-ok{ background:#E9F7EF; color:#145A32; }
 .badge-warn{ background:#FEF5E7; color:#7D6608; }
 .badge-bad{ background:#FDEDEC; color:#922B21; }
 
 /* =========================================================
-   8) HOVER EFFECTS (cards + dataframes)
+   HOVER EFFECTS (cards + dataframes + banner)
    ========================================================= */
 .iaid-banner,
 div[data-testid="stMetric"] > div,
 div[data-testid="stDataFrame"]{
   transition: transform .12s ease, box-shadow .12s ease;
 }
-
+.iaid-banner:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 22px 50px rgba(14, 30, 37, 0.18);
+}
 div[data-testid="stMetric"] > div:hover{
   transform: translateY(-2px);
-  box-shadow: 0 14px 30px rgba(14,30,37,0.10);
+  box-shadow: 0 18px 40px rgba(14,30,37,0.11);
 }
-
 div[data-testid="stDataFrame"]:hover{
   transform: translateY(-1px);
-  box-shadow: 0 14px 30px rgba(14,30,37,0.08);
+  box-shadow: 0 16px 34px rgba(14,30,37,0.09);
 }
 
 /* =========================================================
-   9) HTML TABLE (badges) — top retards
+   HTML TABLE (badges) — premium
    ========================================================= */
 .table-wrap{
   overflow-x:auto;
-  border:1px solid #E6EAF2;
-  border-radius:18px;
+  border:1px solid rgba(230,234,242,0.95);
+  border-radius:20px;
   background:#fff;
-  box-shadow:0 10px 24px rgba(14,30,37,0.04);
+  box-shadow: 0 12px 26px rgba(14,30,37,0.05);
 }
-
-/* table générée par pandas.to_html(..., classes="iaid-table") */
 table.iaid-table{
   width:100%;
   border-collapse: collapse;
   font-size: 12px;
 }
-
 table.iaid-table thead th{
-  background:#F0F3F8;
+  background: linear-gradient(180deg, #F3F6FB 0%, #EEF2F8 100%);
   text-align:left;
   padding:10px 12px;
   font-weight:900;
-  border-bottom:1px solid #E6EAF2;
+  border-bottom:1px solid rgba(230,234,242,0.95);
 }
-
 table.iaid-table tbody td{
   padding:10px 12px;
-  border-bottom:1px solid #F2F4F8;
+  border-bottom:1px solid rgba(242,244,248,0.95);
   vertical-align: top;
 }
-
 table.iaid-table tbody tr:hover{
   background:#FAFBFE;
 }

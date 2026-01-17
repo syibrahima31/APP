@@ -1541,7 +1541,7 @@ unsafe_allow_html=True
 st.markdown(
 """
 <div class="footer-signature">
-  <strong>Ibrahima SY</strong> — Chef de Département • ✉️ dbarry1@groupeisi.com
+  <strong>Ibrahima SY</strong> — Chef de Département • ✉️ ibsy@groupeisi.com
   <br/>
   <strong>Assistante :</strong> Dieynaba Barry • ✉️ dbarry1@groupeisi.com
 </div>

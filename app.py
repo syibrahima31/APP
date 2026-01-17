@@ -1319,7 +1319,7 @@ with st.sidebar:
     is_admin = (pin == st.secrets.get("ADMIN_PIN", ""))
 
 
-    subject = f"IAID — Rappel mensuel : consulter le Dashboard ({today.strftime('%m/%Y')})"
+    subject = f"IAID — Rappel mensuel de pilotage des enseignements ({today.strftime('%m/%Y')})"
     body_text = f"""
     Département IA & Ingénierie des Données (IAID)
     Notification mensuelle — Pilotage des enseignements • {today.strftime('%m/%Y')}

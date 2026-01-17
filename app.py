@@ -1866,9 +1866,69 @@ with tab_qualite:
 
 # ====== EXPORTS ======
 with tab_export:
+    
     st.subheader("Exports (Excel consolidé + PDF officiel)")
 
-    st.write("### Export Excel consolidé")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.write("### Export Excel consolidé")
+        export_df = filtered[
+            ["Classe","Semestre","Matière","Début prévu","Fin prévue","VHP"]
+            + MOIS_COLS
+            + ["VHR","Écart","Taux","Statut_auto","Observations"]
+        ].copy()
+
+        export_df["Taux"] = (export_df["Taux"]*100).round(2)
+
+        synth_class = filtered.groupby("Classe").agg(
+            Matieres=("Matière","count"),
+            Taux_moy=("Taux","mean"),
+            VHP_total=("VHP","sum"),
+            VHR_total=("VHR","sum"),
+            Retard_h=("Écart", lambda s: float(s[s<0].sum()))
+        ).reset_index()
+        synth_class["Taux_moy"] = (synth_class["Taux_moy"]*100).round(2)
+
+        xbytes = df_to_excel_bytes({
+            "Consolidé": export_df,
+            "Synthese_Classes": synth_class,
+        })
+
+        st.download_button(
+            "⬇️ Télécharger l’Excel consolidé",
+            data=xbytes,
+            file_name=f"{export_prefix}_consolide.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+
+    with col2:
+        st.write("### Export PDF (rapport mensuel officiel)")
+        pdf_title = st.text_input(
+            "Titre du rapport PDF",
+            value="Rapport mensuel — Suivi des enseignements (IAID) | Département IA & Ingénierie des Données"
+        )
+        logo_bytes = logo.getvalue() if logo else None
+
+        if st.button("Générer le PDF"):
+            pdf = build_pdf_report(
+                df=filtered[
+                    ["Classe","Semestre","Matière","Début prévu","Fin prévue","VHP"]
+                    + mois_couverts
+                    + ["VHR","Écart","Taux","Statut_auto","Observations"]
+                ].copy(),
+                title=pdf_title,
+                mois_couverts=mois_couverts,
+                thresholds=thresholds,
+                logo_bytes=logo_bytes,
+            )
+            st.download_button(
+                "⬇️ Télécharger le PDF",
+                data=pdf,
+                file_name=f"{export_prefix}_rapport.pdf",
+                mime="application/pdf",
+            )
+
     export_df = filtered[
     ["Classe","Semestre","Matière","Début prévu","Fin prévue","VHP"]
     + MOIS_COLS

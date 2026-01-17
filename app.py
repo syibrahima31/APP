@@ -614,7 +614,7 @@ unsafe_allow_html=True
 # -----------------------------
 # Paramètres
 # -----------------------------
-MOIS_COLS = ["Oct", "Nov", "Déc", "Jan", "Fév", "Mars", "Avril", "Mai"]
+MOIS_COLS = ["Oct", "Nov", "Déc", "Jan", "Fév", "Mars", "Avril", "Mai", "Juin", "Juil", "Août"]
 # Pour l’ordre chrono (année académique)
 MOIS_ORDER = {m:i for i,m in enumerate(MOIS_COLS, start=1)}
 
@@ -1205,7 +1205,7 @@ with st.sidebar:
     file_bytes = None
     source_label = None
 
-    st.caption("Chaque feuille = une classe. Colonnes attendues : Matière, VHP, Oct..Mai (au minimum).")
+    st.caption("Chaque feuille = une classe. Colonnes attendues : Matière, VHP, Oct..Août (au minimum).")
     sidebar_card_end()
 
     # =========================================================
@@ -1247,10 +1247,10 @@ with st.sidebar:
     sidebar_card("Période couverte")
 
     mois_min, mois_max = st.select_slider(
-        "Mois (de → à)",
-        options=MOIS_COLS,
-        value=("Oct", "Mai"),
-    )
+    "Mois (de → à)",
+    options=MOIS_COLS,
+    value=("Oct", "Août"),)
+
     mois_couverts = MOIS_COLS[MOIS_COLS.index(mois_min): MOIS_COLS.index(mois_max) + 1]
 
     sidebar_card_end()

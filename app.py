@@ -961,6 +961,10 @@ def build_pdf_report(
     mois_couverts: List[str],
     thresholds: dict,
     logo_bytes: Optional[bytes] = None,
+    author_name: str = "Ibrahima SY",
+    assistant_name: str = "Dieynaba Barry",
+    department: str = "Département IA & Ingénierie des Données (IAID)",
+    institution: str = "Institut Supérieur Informatique",
 ) -> bytes:
     styles = getSampleStyleSheet()
     H1 = ParagraphStyle("H1", parent=styles["Heading1"], fontSize=16, spaceAfter=10)
@@ -974,19 +978,96 @@ def build_pdf_report(
     story = []
 
     # Couverture
+    # -----------------------------
+    # COUVERTURE PRO (HEADER OFFICIEL)
+    # -----------------------------
+    now_dt = dt.datetime.now()
+    date_gen = now_dt.strftime("%d/%m/%Y %H:%M")
+    periode_str = " – ".join(mois_couverts) if mois_couverts else "—"
+
+    # Tableau en-tête (logo + infos)
+    logo_cell = ""
     if logo_bytes:
         try:
             img = RLImage(io.BytesIO(logo_bytes))
-            img.drawHeight = 2.0*cm
-            img.drawWidth  = 2.0*cm
-            story.append(img)
+            img.drawHeight = 2.2*cm
+            img.drawWidth  = 2.2*cm
+            logo_cell = img
         except:
-            pass
+            logo_cell = ""
 
-    story.append(Paragraph(title, H1))
-    story.append(Paragraph(f"Période couverte (heures mensuelles) : <b>{' – '.join(mois_couverts)}</b>", P))
-    story.append(Paragraph(f"Date de génération : <b>{dt.datetime.now().strftime('%d/%m/%Y %H:%M')}</b>", P))
+    header_rows = [
+        [
+            logo_cell,
+            Paragraph(
+                f"""
+                <b>{institution}</b><br/>
+                {department}<br/>
+                <font size="9" color="#475569">
+                Rapport officiel de suivi des enseignements<br/>
+                </font>
+                """,
+                P
+            ),
+            Paragraph(
+                f"""
+                <b>Date :</b> {date_gen}<br/>
+                <b>Période :</b> {periode_str}<br/>
+                <b>Référence :</b> IAID-SUIVI-{now_dt.strftime("%Y%m")}
+                """,
+                P
+            )
+        ]
+    ]
+
+    header_tbl = Table(header_rows, colWidths=[2.6*cm, 9.4*cm, 4.0*cm])
+    header_tbl.setStyle(TableStyle([
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("ALIGN", (0,0), (0,0), "LEFT"),
+        ("ALIGN", (2,0), (2,0), "RIGHT"),
+        ("BOTTOMPADDING", (0,0), (-1,-1), 8),
+    ]))
+
+    story.append(header_tbl)
+
+    # Bandeau titre (style "document officiel")
+    banner = Table(
+        [[Paragraph(f"<b>{title}</b>", ParagraphStyle("Banner", parent=H1, textColor=colors.white, fontSize=14))]],
+        colWidths=[15.9*cm]
+    )
+    banner.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,-1), colors.HexColor("#0B3D91")),
+        ("LEFTPADDING", (0,0), (-1,-1), 10),
+        ("RIGHTPADDING", (0,0), (-1,-1), 10),
+        ("TOPPADDING", (0,0), (-1,-1), 8),
+        ("BOTTOMPADDING", (0,0), (-1,-1), 8),
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+    ]))
+    story.append(banner)
+
     story.append(Spacer(1, 10))
+
+    # Bloc signatures (Auteur + Assistante)
+    sign_tbl = Table(
+        [[
+            Paragraph(f"<b>Auteur :</b> {author_name}<br/><font size='8' color='#475569'>Chef de Département</font>", P),
+            Paragraph(f"<b>Assistante :</b> {assistant_name}<br/><font size='8' color='#475569'>Support administratif</font>", P),
+        ]],
+        colWidths=[7.9*cm, 8.0*cm]
+    )
+    sign_tbl.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,-1), colors.HexColor("#F6F8FC")),
+        ("BOX", (0,0), (-1,-1), 0.4, colors.HexColor("#E3E8F0")),
+        ("INNERGRID", (0,0), (-1,-1), 0.25, colors.HexColor("#E3E8F0")),
+        ("LEFTPADDING", (0,0), (-1,-1), 10),
+        ("RIGHTPADDING", (0,0), (-1,-1), 10),
+        ("TOPPADDING", (0,0), (-1,-1), 8),
+        ("BOTTOMPADDING", (0,0), (-1,-1), 8),
+    ]))
+    story.append(sign_tbl)
+
+    story.append(Spacer(1, 10))
+
 
     # KPIs globaux
     total = len(df)
@@ -1068,7 +1149,16 @@ def build_pdf_report(
         story.append(t)
         story.append(Spacer(1, 8))
 
-    doc.build(story)
+    def _footer(canvas, doc_):
+        canvas.saveState()
+        canvas.setFont("Helvetica", 8)
+        canvas.setFillColor(colors.HexColor("#475569"))
+        canvas.drawString(1.6*cm, 1.0*cm, f"{department} — Rapport de suivi des enseignements")
+        canvas.drawRightString(19.4*cm, 1.0*cm, f"Généré le {dt.datetime.now().strftime('%d/%m/%Y %H:%M')}  |  Page {doc_.page}")
+        canvas.restoreState()
+
+    doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
+
     return out.getvalue()
 
 # -----------------------------
@@ -1984,7 +2074,11 @@ with tab_export:
                 mois_couverts=mois_couverts,
                 thresholds=thresholds,
                 logo_bytes=logo_bytes,
-            )
+                author_name="Ibrahima SY",
+                assistant_name="Dieynaba Barry",
+                department="Département IA & Ingénierie des Données (IAID)",
+                institution="Institut Supérieur Informatique",)
+
             st.download_button(
                 "⬇️ Télécharger le PDF",
                 data=pdf,

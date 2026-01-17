@@ -1340,39 +1340,113 @@ with st.sidebar:
     body_html = f"""
     <!doctype html>
     <html>
-    <body style="font-family:Arial,Helvetica,sans-serif;background:#ffffff;color:#0F172A;">
-        <div style="max-width:720px;margin:0 auto;padding:18px 10px;">
-        <div style="font-weight:900;font-size:16px;">Département IA &amp; Ingénierie des Données (IAID)</div>
-        <div style="margin-top:6px;font-weight:700;font-size:13px;">
-            Notification mensuelle — Pilotage des enseignements • {today.strftime('%m/%Y')}
-        </div>
-        <div style="margin-top:6px;font-size:12px;color:#475569;font-weight:700;">
-            Mise à jour : {dt.datetime.now().strftime('%d/%m/%Y %H:%M')}
-        </div>
+    <body style="margin:0;padding:0;background:#0B3D91;">
+        
+        <!-- BACKGROUND BLEU -->
+        <div style="
+            background:linear-gradient(180deg,#0B3D91 0%,#134FA8 100%);
+            padding:40px 12px;
+        ">
 
-        <p style="margin:18px 0 10px 0;">Bonjour Madame, Monsieur,</p>
+        <!-- CARTE BLANCHE -->
+        <div style="
+            max-width:720px;
+            margin:0 auto;
+            background:#FFFFFF;
+            border-radius:20px;
+            box-shadow:0 20px 50px rgba(0,0,0,0.25);
+            overflow:hidden;
+            font-family:Arial,Helvetica,sans-serif;
+            color:#0F172A;
+        ">
 
-        <p style="margin:0 0 14px 0;">
-            Dans le cadre du pilotage académique, nous vous invitons à consulter le Dashboard IAID
-            (avancement par classe et par matière, alertes, synthèses et exports officiels).
-        </p>
+            <!-- EN-TÊTE -->
+            <div style="
+                padding:22px 26px;
+                background:linear-gradient(90deg,#0B3D91,#1F6FEB);
+                color:#FFFFFF;
+            ">
+            <div style="font-size:18px;font-weight:900;">
+                Département IA &amp; Ingénierie des Données (IAID)
+            </div>
+            <div style="margin-top:6px;font-size:13px;font-weight:700;opacity:.95;">
+                Notification mensuelle — Pilotage des enseignements • {today.strftime('%m/%Y')}
+            </div>
+            <div style="margin-top:6px;font-size:12px;font-weight:700;opacity:.9;">
+                Mise à jour : {dt.datetime.now().strftime('%d/%m/%Y %H:%M')}
+            </div>
+            </div>
 
-        <div style="margin:16px 0;">
-            <a href="{dashboard_url}" style="display:inline-block;background:#0B3D91;color:#fff;text-decoration:none;
-            padding:10px 14px;border-radius:10px;font-weight:900;font-size:13px;">
-            Ouvrir le Dashboard IAID →
-            </a>
-        </div>
+            <!-- CONTENU -->
+            <div style="padding:26px;line-height:1.55;">
+            
+            <p style="margin-top:0;">
+                Bonjour Madame, Monsieur,
+            </p>
 
-        <div style="margin-top:16px;border:1px solid #E3E8F0;border-radius:12px;padding:12px;">
-            <div style="font-weight:900;color:#0B3D91;margin-bottom:6px;">📌 Informations clés</div>
-            <div style="font-size:13px;"><b>Période :</b> {today.strftime('%m/%Y')}</div>
-            <div style="font-size:13px;"><b>Lien :</b> <a href="{dashboard_url}" style="color:#1F6FEB;text-decoration:none;">{dashboard_url}</a></div>
+            <p>
+                Dans le cadre du <b>pilotage académique</b>, nous vous invitons à consulter le
+                <b>Dashboard IAID</b> (avancement par classe et par matière, alertes, synthèses
+                et exports officiels).
+            </p>
+
+            <!-- BOUTON -->
+            <div style="margin:22px 0;text-align:center;">
+                <a href="{dashboard_url}" style="
+                    display:inline-block;
+                    background:#0B3D91;
+                    color:#FFFFFF;
+                    text-decoration:none;
+                    padding:14px 22px;
+                    border-radius:14px;
+                    font-weight:900;
+                    font-size:14px;
+                    box-shadow:0 10px 24px rgba(14,30,37,0.25);
+                ">
+                Ouvrir le Dashboard IAID →
+                </a>
+            </div>
+
+            <!-- INFOS CLÉS -->
+            <div style="
+                margin-top:24px;
+                background:#F6F8FC;
+                border:1px solid #E3E8F0;
+                border-radius:14px;
+                padding:14px 16px;
+            ">
+                <div style="font-weight:900;color:#0B3D91;margin-bottom:8px;">
+                📌 Informations clés
+                </div>
+                <div style="font-size:13px;"><b>Période :</b> {today.strftime('%m/%Y')}</div>
+                <div style="font-size:13px;">
+                <b>Lien :</b>
+                <a href="{dashboard_url}" style="color:#1F6FEB;text-decoration:none;">
+                    {dashboard_url}
+                </a>
+                </div>
+            </div>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div style="
+                padding:14px 26px;
+                background:#FBFCFF;
+                border-top:1px solid #E3E8F0;
+                font-size:12px;
+                color:#475569;
+                text-align:center;
+            ">
+            Message automatique — Département IA &amp; Ingénierie des Données (IAID)
+            </div>
+
         </div>
         </div>
     </body>
     </html>
     """.strip()
+
 
 
 

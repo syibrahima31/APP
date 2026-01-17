@@ -754,6 +754,15 @@ def df_to_excel_bytes(sheets: Dict[str, pd.DataFrame]) -> bytes:
             sheet_df.to_excel(writer, sheet_name=name[:31], index=False)
     return output.getvalue()
 
+@st.cache_data(show_spinner=False, ttl=60)  # cache 60 sec
+def fetch_excel_from_url(url: str) -> bytes:
+    r = requests.get(url.strip(), timeout=30)
+    r.raise_for_status()
+    return r.content
+@st.cache_data(show_spinner=False)
+def make_long(df_period: pd.DataFrame) -> pd.DataFrame:
+    return unpivot_months(df_period)
+
 # -----------------------------
 # Rappel mensuel DG/DGE (Email)
 # -----------------------------
@@ -1096,12 +1105,11 @@ with st.sidebar:
 
         if url.strip():
             try:
-                r = requests.get(url.strip(), timeout=30)
-                r.raise_for_status()
-                file_bytes = r.content
-                source_label = "URL"
+                file_bytes = fetch_excel_from_url(url.strip())
+                source_label = "URL (cached)"
             except Exception as e:
                 st.error(f"Erreur téléchargement: {e}")
+
 
     else:
         uploaded = st.file_uploader("Importer le fichier Excel (.xlsx)", type=["xlsx"])
@@ -1777,7 +1785,7 @@ with tab_matieres:
 with tab_mensuel:
     st.subheader("Analyse mensuelle — heures réalisées & tendances")
 
-    long = unpivot_months(df_period)
+    long = make_long(df_period)
     # Appliquer filtres classes/statuts à la table longue via merge index
     base_keys = filtered[["_rowid"]].drop_duplicates()
     long_f = long.merge(base_keys, on="_rowid", how="inner")
@@ -1793,9 +1801,13 @@ with tab_mensuel:
     pivot = long_f.pivot_table(index="Classe", columns="Mois", values="Heures", aggfunc="sum", fill_value=0).reindex(columns=MOIS_COLS)
     st.dataframe(style_table(pivot.reset_index()), use_container_width=True)
 
-    fig = px.imshow(pivot.values, x=pivot.columns, y=pivot.index, aspect="auto",
-                    title="Heatmap — Heures par classe et par mois")
-    st.plotly_chart(fig, use_container_width=True)
+    if pivot.shape[0] > 40:
+        st.info("Heatmap désactivée (trop de classes) → filtre une ou deux classes pour l’afficher.")
+    else:
+        fig = px.imshow(pivot.values, x=pivot.columns, y=pivot.index, aspect="auto",
+                        title="Heatmap — Heures par classe et par mois")
+        st.plotly_chart(fig, use_container_width=True)
+
 
 
     st.write("### Classe la plus active par mois")

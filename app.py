@@ -1906,8 +1906,9 @@ with tab_export:
         st.write("### Export PDF (rapport mensuel officiel)")
         pdf_title = st.text_input(
             "Titre du rapport PDF",
-            value="Rapport mensuel — Suivi des enseignements (IAID) | Département IA & Ingénierie des Données"
-        )
+            value="Rapport mensuel — Suivi des enseignements (IAID) | Département IA & Ingénierie des Données",
+            key="pdf_title_export")
+
         logo_bytes = logo.getvalue() if logo else None
 
         if st.button("Générer le PDF"):
@@ -1923,11 +1924,13 @@ with tab_export:
                 logo_bytes=logo_bytes,
             )
             st.download_button(
-                "⬇️ Télécharger le PDF",
-                data=pdf,
-                file_name=f"{export_prefix}_rapport.pdf",
-                mime="application/pdf",
+                "⬇️ Télécharger l’Excel consolidé",
+                data=xbytes,
+                file_name=f"{export_prefix}_consolide.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                key="dl_excel_consolide"
             )
+
 
     export_df = filtered[
     ["Classe","Semestre","Matière","Début prévu","Fin prévue","VHP"]

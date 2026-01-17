@@ -327,7 +327,7 @@ a:hover{ text-decoration: underline; }
 ------------------------------*/
 .block-container{
   padding-top: .25rem !important;
-  padding-bottom: 2rem !important;
+  padding-bottom: 4.5rem !important;
 }
 header[data-testid="stHeader"],
 div[data-testid="stToolbar"]{
@@ -1434,6 +1434,17 @@ f"""
     <div class="iaid-badge">KPIs • Alertes • Qualité</div>
     <div class="iaid-badge">Exports : PDF officiel + Excel consolidé</div>
   </div>
+</div>
+""",
+unsafe_allow_html=True
+)
+
+st.markdown(
+"""
+<div class="footer-signature">
+  <strong>Ibrahima SY</strong> — Chef de Département • ✉️ dbarry1@groupeisi.com
+  <br/>
+  <strong>Assistante :</strong> Dieynaba Barry • ✉️ dbarry1@groupeisi.com
 </div>
 """,
 unsafe_allow_html=True

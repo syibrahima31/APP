@@ -1957,33 +1957,6 @@ with tab_export:
 
    
 
-    st.divider()
-    st.write("### Export PDF (rapport mensuel officiel)")
-
-    pdf_title = st.text_input(
-        "Titre du rapport PDF",
-        value="Rapport mensuel — Suivi des enseignements (IAID) | Département IA & Ingénierie des Données"
-    )
-    logo_bytes = logo.getvalue() if logo else None
-
-    if st.button("Générer le PDF"):
-        pdf = build_pdf_report(
-        df=filtered[
-        ["Classe","Semestre","Matière","Début prévu","Fin prévue","VHP"]
-        + mois_couverts
-        + ["VHR","Écart","Taux","Statut_auto","Observations"]
-        ].copy(),
-
-            title=pdf_title,
-            mois_couverts=mois_couverts,
-            thresholds=thresholds,
-            logo_bytes=logo_bytes,
-        )
-        st.download_button(
-            "⬇️ Télécharger le PDF",
-            data=pdf,
-            file_name=f"{export_prefix}_rapport.pdf",
-            mime="application/pdf",
-        )
+    
 
 st.caption("✅ Astuce : standardise les colonnes sur toutes les feuilles. L’app calcule automatiquement VHR/Écart/Taux/Statut selon la période sélectionnée.")

@@ -1849,7 +1849,7 @@ with tab_overview:
         ["Classe","Matière","VHP","VHR","Écart","Taux","Statut_badge","Observations"]
     ].to_html(escape=False, index=False, classes="iaid-table")
 
-    st.markdown(f'<div class="table-wrap">{html_table}</div>', unsafe_allow_html=True
+    st.markdown(f'<div class="table-wrap">{html_table}</div>', unsafe_allow_html=True)
 
     st.dataframe(
     top_retards[["Classe","Matière","VHP","VHR","Écart","Taux","Statut_auto","Observations"]],

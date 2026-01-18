@@ -699,7 +699,15 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     "Début": "Début prévu",
     "Fin prévue ": "Fin prévue",
     "Fin prevue": "Fin prévue",
-    "Fin": "Fin prévue",}
+    "Fin": "Fin prévue",
+
+    # Email enseignant
+    "Mail": "Email",
+    "E-mail": "Email",
+    "Email ": "Email",
+    "Email enseignant": "Email",
+    "Email Enseignant": "Email",
+    }
 
     df = df.rename(columns={k:v for k,v in rename_map.items() if k in df.columns})
     return df
@@ -747,6 +755,19 @@ def compute_metrics(df: pd.DataFrame) -> pd.DataFrame:
         .str.replace("\n", " ", regex=False)
         .str.strip()
     )
+
+    # Garantir Email
+    if "Email" not in df.columns:
+        df["Email"] = ""
+
+    df["Email"] = (
+        df["Email"].astype(str)
+        .replace({"nan": "", "None": ""})
+        .fillna("")
+        .str.strip()
+        .str.lower()
+    )
+
 
 
     # Nettoyage texte (éviter 'nan')
@@ -2191,12 +2212,42 @@ with tab_mensuel:
 with tab_alertes:
     st.subheader("Alertes intelligentes (paramétrables)")
 
-    # Scoring simple d'alerte
     tmp = filtered.copy()
-    tmp["Niveau"] = np.where(tmp["Taux"] >= thresholds["taux_vert"], "Vert",
-                     np.where(tmp["Taux"] >= thresholds["taux_orange"], "Orange", "Rouge"))
-    tmp["Critique"] = (tmp["Écart"] <= thresholds["ecart_critique"]) | (tmp["Statut_auto"]=="Non démarré")
-    tmp = tmp.sort_values(["Critique","Niveau","Écart"], ascending=[False, True, True])
+
+    # --- Dates (si format Excel texte) : on tente parse ---
+    tmp["Début_dt"] = pd.to_datetime(tmp["Début prévu"], errors="coerce", dayfirst=True)
+    tmp["Fin_dt"]   = pd.to_datetime(tmp["Fin prévue"], errors="coerce", dayfirst=True)
+
+    today_dt = pd.Timestamp(dt.date.today())
+
+    # --- Règles d'alerte ---
+    tmp["Alerte_retard_critique"] = (tmp["Écart"] <= thresholds["ecart_critique"])
+    tmp["Alerte_non_demarre"] = (tmp["Statut_auto"] == "Non démarré") & (
+        tmp["Début_dt"].isna() | (tmp["Début_dt"] <= today_dt)
+    )
+    tmp["Alerte_fin_depassee"] = (tmp["Statut_auto"] != "Terminé") & tmp["Fin_dt"].notna() & (tmp["Fin_dt"] < today_dt)
+
+    def raison_alerte(row):
+        reasons = []
+        if row["Alerte_fin_depassee"]:
+            reasons.append("⛔ Fin dépassée")
+        if row["Alerte_retard_critique"]:
+            reasons.append("🔻 Retard critique")
+        if row["Alerte_non_demarre"]:
+            reasons.append("🛑 Non démarré")
+        return " • ".join(reasons)
+
+    tmp["Raison_alerte"] = tmp.apply(raison_alerte, axis=1)
+    tmp["En_alerte"] = tmp["Raison_alerte"].ne("")
+
+    # Tri : fin dépassée puis retard puis non démarré, puis écart
+    tmp["_prio"] = (
+        tmp["Alerte_fin_depassee"].astype(int)*3 +
+        tmp["Alerte_retard_critique"].astype(int)*2 +
+        tmp["Alerte_non_demarre"].astype(int)*1
+    )
+    tmp = tmp.sort_values(["_prio", "Écart"], ascending=[False, True])
+
 
     c1, c2 = st.columns(2)
     with c1:
@@ -2227,6 +2278,105 @@ with tab_alertes:
                 "VHR": st.column_config.NumberColumn("VHR", format="%.0f"),
             }
         )
+
+        st.divider()
+        st.write("### 📧 Alertes par enseignant (préparation envoi)")
+
+        # 1) On garde seulement les lignes en alerte
+        alerts_full = tmp.loc[
+            tmp["Critique"] | (tmp["Niveau"] == "Rouge"),
+            ["Responsable", "Email", "Classe", "Matière", "Semestre", "Type", "VHP", "VHR", "Écart", "Taux", "Statut_auto", "Observations"]
+        ].copy()
+
+        # 2) Nettoyage Email
+        if "Email" not in alerts_full.columns:
+            st.warning("Colonne 'Email' absente. Ajoute-la dans le fichier Excel.")
+        else:
+            alerts_full["Email"] = (
+                alerts_full["Email"].astype(str)
+                .replace({"nan": "", "None": ""})
+                .fillna("")
+                .str.strip()
+                .str.lower()
+            )
+
+            # 3) Synthèse par enseignant
+            synth_prof = alerts_full[alerts_full["Email"] != ""].groupby(["Responsable", "Email"]).agg(
+                Nb_alertes=("Matière", "count"),
+                Nb_non_demarre=("Statut_auto", lambda s: int((s == "Non démarré").sum())),
+                Nb_retard_critique=("Écart", lambda s: int((s <= thresholds["ecart_critique"]).sum())),
+            ).reset_index().sort_values("Nb_alertes", ascending=False)
+
+            if synth_prof.empty:
+                st.info("Aucune alerte avec un email enseignant renseigné.")
+            else:
+                st.dataframe(synth_prof, use_container_width=True)
+
+            st.caption("✅ Un seul email sera envoyé par enseignant (Email).")
+            st.divider()
+
+            # 4) Bouton d'envoi (admin seulement)
+            st.write("### 🚀 Envoyer les alertes aux enseignants")
+
+            # Réutilise ton système admin PIN (déjà défini dans la sidebar)
+            # is_admin doit exister (tu l'as dans la sidebar: is_admin = (pin == ADMIN_PIN))
+
+            if st.button("📩 Envoyer maintenant aux enseignants", key="send_prof_alerts"):
+                if not is_admin:
+                    st.error("Accès refusé : PIN incorrect.")
+                else:
+                    # Grouper par enseignant et envoyer 1 mail chacun
+                    sent = 0
+                    errors = 0
+
+                    # On envoie seulement si Email non vide
+                    grp = alerts_full[alerts_full["Email"] != ""].groupby(["Responsable", "Email"])
+
+                    for (prof, mail), gprof in grp:
+                        # Construire contenu texte simple
+                        lignes = []
+                        for _, r in gprof.sort_values(["Statut_auto", "Écart"]).iterrows():
+                            lignes.append(
+                                f"- {r['Classe']} | {r.get('Semestre','')} | {r.get('Type','')} | {r['Matière']} | "
+                                f"VHP={int(r['VHP'])} VHR={int(r['VHR'])} Écart={int(r['Écart'])} | {r['Statut_auto']}"
+                            )
+
+                        body_text_prof = (
+                            f"IAID — Alerte de suivi des enseignements\n"
+                            f"Période : {mois_min} → {mois_max}\n\n"
+                            f"Bonjour {prof},\n\n"
+                            f"Vous avez {len(gprof)} matière(s) en alerte.\n\n"
+                            + "\n".join(lignes)
+                            + "\n\n"
+                            f"Dashboard : {dashboard_url}\n"
+                            f"Merci de mettre à jour les heures réalisées.\n"
+                        )
+
+                        subject_prof = f"IAID — Alerte enseignements ({mois_min}→{mois_max}) : {len(gprof)} module(s)"
+
+                        # HTML léger (facultatif). Ici on envoie juste texte (plus fiable).
+                        try:
+                            send_email_reminder(
+                                smtp_host=st.secrets["SMTP_HOST"],
+                                smtp_port=int(st.secrets["SMTP_PORT"]),
+                                smtp_user=st.secrets["SMTP_USER"],
+                                smtp_pass=st.secrets["SMTP_PASS"],
+                                sender=st.secrets["SMTP_FROM"],
+                                recipients=[mail],
+                                subject=subject_prof,
+                                body_text=body_text_prof,
+                                body_html=None
+                            )
+                            sent += 1
+                        except Exception as e:
+                            errors += 1
+                            st.error(f"Erreur envoi à {prof} ({mail}) : {e}")
+
+                    if sent > 0:
+                        st.success(f"✅ Alertes envoyées à {sent} enseignant(s).")
+                    if errors > 0:
+                        st.warning(f"⚠️ {errors} envoi(s) en échec.")
+
 
 
     with c2:

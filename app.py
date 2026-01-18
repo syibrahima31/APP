@@ -2254,9 +2254,10 @@ with tab_alertes:
         st.write("### Liste des alertes (priorisées)")
 
         alerts = tmp.loc[
-            tmp["Critique"] | (tmp["Niveau"] == "Rouge"),
-            ["Classe","Matière","VHP","VHR","Écart","Taux","Statut_auto","Niveau","Observations"]
-        ].copy()
+        tmp["En_alerte"],
+        ["Classe","Matière","VHP","VHR","Écart","Taux","Statut_auto","Raison_alerte","Observations"]
+    ].copy()
+
 
         # 1) Taux en %
         alerts["Taux (%)"] = (alerts["Taux"] * 100).round(1)
@@ -2269,7 +2270,7 @@ with tab_alertes:
 
         # 3) Affichage (on cache Statut_auto)
         st.dataframe(
-            alerts[["Classe","Matière","VHP","VHR","Écart","Taux (%)","Statut","Niveau","Observations"]].head(50),
+            alerts[["Classe","Matière","VHP","VHR","Écart","Taux (%)","Statut","Raison_alerte","Observations"]].head(50),
             use_container_width=True,
             column_config={
                 "Taux (%)": st.column_config.ProgressColumn("Taux (%)", min_value=0.0, max_value=100.0, format="%.1f%%"),
@@ -2284,9 +2285,10 @@ with tab_alertes:
 
         # 1) On garde seulement les lignes en alerte
         alerts_full = tmp.loc[
-            tmp["Critique"] | (tmp["Niveau"] == "Rouge"),
-            ["Responsable", "Email", "Classe", "Matière", "Semestre", "Type", "VHP", "VHR", "Écart", "Taux", "Statut_auto", "Observations"]
-        ].copy()
+        tmp["En_alerte"] & (tmp["Email"].astype(str).str.strip() != ""),
+        ["Responsable", "Email", "Classe", "Matière", "Semestre", "Type", "VHP", "VHR", "Écart", "Taux", "Statut_auto", "Raison_alerte", "Observations"]
+    ].copy()
+
 
         # 2) Nettoyage Email
         if "Email" not in alerts_full.columns:
@@ -2338,7 +2340,7 @@ with tab_alertes:
                         for _, r in gprof.sort_values(["Statut_auto", "Écart"]).iterrows():
                             lignes.append(
                                 f"- {r['Classe']} | {r.get('Semestre','')} | {r.get('Type','')} | {r['Matière']} | "
-                                f"VHP={int(r['VHP'])} VHR={int(r['VHR'])} Écart={int(r['Écart'])} | {r['Statut_auto']}"
+                                f"VHP={int(r['VHP'])} VHR={int(r['VHR'])} Écart={int(r['Écart'])} | {r['Statut_auto']} | {r.get('Raison_alerte','')}"
                             )
 
                         body_text_prof = (

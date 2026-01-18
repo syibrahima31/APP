@@ -659,10 +659,6 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     "Enseignant": "Responsable",
     "Prof": "Responsable",
 
-    # Type
-    "Type ": "Type",
-    "Nature": "Type",
-
     # Semestre
     "Semestre ": "Semestre",
     "Semester": "Semestre",
@@ -713,6 +709,18 @@ def compute_metrics(df: pd.DataFrame) -> pd.DataFrame:
     for c in ["Semestre", "Observations", "Début prévu", "Fin prévue"]:
         if c not in df.columns:
             df[c] = ""
+            
+    # Garantir Responsable
+    if "Responsable" not in df.columns:
+        df["Responsable"] = ""
+
+    df["Responsable"] = (
+        df["Responsable"].astype(str)
+        .replace({"nan": "", "None": ""})
+        .fillna("")
+        .str.replace("\n", " ", regex=False)
+        .str.strip()
+    )
 
 
     # Nettoyage texte (éviter 'nan')
@@ -761,7 +769,7 @@ def unpivot_months(df: pd.DataFrame) -> pd.DataFrame:
     # Format long : Classe, Matière, VHP, Mois, Heures
     id_cols = [c for c in [
         "_rowid",
-        "Classe", "Semestre", "Matière", "Responsable", "Type",
+        "Classe", "Semestre", "Matière", "Responsable",
         "VHP", "VHR", "Écart", "Taux",
         "Statut_auto", "Statut", "Observations",
         "Début prévu", "Fin prévue"
@@ -850,7 +858,7 @@ def send_email_reminder(
     subject: str,
     body_text: str,
     body_html: Optional[str] = None,    
-        ) -> None:
+) -> None:
     msg = EmailMessage()
     msg["Subject"] = subject
     msg["From"] = sender
@@ -1638,6 +1646,16 @@ selected_classes = st.sidebar.multiselect("Classes", classes, default=classes)
 status_opts = ["Non démarré", "En cours", "Terminé"]
 selected_status = st.sidebar.multiselect("Statuts", status_opts, default=status_opts)
 
+# -----------------------------
+# Filtre Responsable (enseignant)
+# -----------------------------
+responsables = sorted([x for x in df_period["Responsable"].dropna().unique().tolist() if str(x).strip()])
+selected_responsables = st.sidebar.multiselect(
+    "Responsables (enseignants)",
+    responsables,
+    default=responsables
+) if responsables else []
+
 
 search_matiere = st.sidebar.text_input("Recherche Matière (regex)", value="")
 show_only_delay = st.sidebar.checkbox("Uniquement retards (Écart < 0)", value=False)
@@ -1650,6 +1668,10 @@ filtered_base = df_period[
     & df_period["Statut_auto"].isin(selected_status)
     & (df_period["VHP"] >= min_vhp)
 ].copy()
+
+if selected_responsables:
+    filtered_base = filtered_base[filtered_base["Responsable"].isin(selected_responsables)]
+
 
 # Semestre
 if selected_semestre is not None:
@@ -1682,9 +1704,10 @@ if not classes_filtered:
 # -----------------------------
 # Onglets (Ultra)
 # -----------------------------
-tab_overview, tab_classes, tab_matieres, tab_mensuel, tab_alertes, tab_qualite, tab_export = st.tabs(
-    ["Vue globale", "Par classe", "Par matière", "Analyse mensuelle", "Alertes", "Qualité des données", "Exports"]
+tab_overview, tab_classes, tab_matieres, tab_enseignants, tab_mensuel, tab_alertes, tab_qualite, tab_export = st.tabs(
+    ["Vue globale", "Par classe", "Par matière", "Par enseignant", "Analyse mensuelle", "Alertes", "Qualité des données", "Exports"]
 )
+
 
 # ====== VUE GLOBALE ======
 with tab_overview:
@@ -1911,6 +1934,109 @@ with tab_matieres:
     else:
         st.dataframe(al.sort_values("Taux (%)").head(30), use_container_width=True)
 
+
+# ====== PAR ENSEIGNANT ======
+with tab_enseignants:
+    st.subheader("Suivi par enseignant (Responsable) — retards & charge")
+
+    tmp = filtered.copy()
+
+    if "Responsable" not in tmp.columns:
+        st.warning("La colonne 'Responsable' n'existe pas dans les données.")
+    else:
+        tmp["Responsable"] = (
+            tmp["Responsable"].astype(str)
+            .replace({"nan": "", "None": ""})
+            .fillna("")
+            .str.strip()
+        )
+
+        # Inclure les modules non affectés (utile)
+        tmp["Responsable"] = tmp["Responsable"].replace({"": "⚠️ Non affecté"})
+
+        # 1) Synthèse par enseignant
+        synth_r = tmp.groupby("Responsable").agg(
+            Matieres=("Matière", "count"),
+            Classes=("Classe", "nunique"),
+            VHP_total=("VHP", "sum"),
+            VHR_total=("VHR", "sum"),
+            Taux_moy=("Taux", "mean"),
+            Retard_h=("Écart", lambda s: float(s[s < 0].sum())),
+            Non_demarre=("Statut_auto", lambda s: int((s == "Non démarré").sum())),
+            En_cours=("Statut_auto", lambda s: int((s == "En cours").sum())),
+            Termine=("Statut_auto", lambda s: int((s == "Terminé").sum())),
+        ).reset_index()
+
+        synth_r["Taux (%)"] = (synth_r["Taux_moy"] * 100).round(1)
+
+        # tri : retard le plus critique d'abord (plus négatif)
+        synth_r = synth_r.sort_values(["Retard_h", "Taux (%)"], ascending=[True, True])
+
+        st.write("### Synthèse par enseignant")
+        st.dataframe(
+            synth_r[["Responsable","Matieres","Classes","Taux (%)","VHP_total","VHR_total","Retard_h","Non_demarre","En_cours","Termine"]],
+            use_container_width=True,
+            column_config={
+                "Taux (%)": st.column_config.ProgressColumn("Taux (%)", min_value=0.0, max_value=100.0, format="%.1f%%"),
+                "Retard_h": st.column_config.NumberColumn("Retard (h)", format="%.0f"),
+                "VHP_total": st.column_config.NumberColumn("VHP total", format="%.0f"),
+                "VHR_total": st.column_config.NumberColumn("VHR total", format="%.0f"),
+            }
+        )
+
+        st.divider()
+
+        # 2) Top retards (détails)
+        st.write("### Top retards — détails par enseignant")
+        top_n = st.slider("Nombre de lignes (Top retards)", 10, 200, 50, 10, key="top_retards_ens")
+
+        top_ret = tmp[tmp["Écart"] < 0].sort_values("Écart").head(top_n)[
+            ["Responsable","Classe","Matière","Semestre","VHP","VHR","Écart","Taux","Statut_auto","Observations"]
+        ].copy()
+
+        st.dataframe(
+            top_ret,
+            use_container_width=True,
+            column_config={
+                "Taux": st.column_config.ProgressColumn("Taux", min_value=0.0, max_value=1.0, format="%.0f%%"),
+                "Écart": st.column_config.NumberColumn("Écart (h)", format="%.0f"),
+                "VHP": st.column_config.NumberColumn("VHP", format="%.0f"),
+                "VHR": st.column_config.NumberColumn("VHR", format="%.0f"),
+            }
+        )
+
+        st.divider()
+
+        # 3) Non démarrés par enseignant
+        st.write("### Non démarrés — par enseignant")
+        nd = tmp[tmp["Statut_auto"] == "Non démarré"].groupby("Responsable").size().sort_values(ascending=False)
+        if nd.empty:
+            st.success("Aucun 'Non démarré' avec les filtres actuels ✅")
+        else:
+            st.bar_chart(nd)
+
+        st.divider()
+
+        # 4) Charge par enseignant
+        st.write("### Charge par enseignant — VHP prévu vs VHR réalisé")
+        charge = tmp.groupby("Responsable").agg(
+            VHP_total=("VHP", "sum"),
+            VHR_total=("VHR", "sum"),
+        ).reset_index()
+        charge["Écart_total"] = charge["VHR_total"] - charge["VHP_total"]
+        charge = charge.sort_values("Écart_total")
+
+        st.dataframe(
+            charge,
+            use_container_width=True,
+            column_config={
+                "VHP_total": st.column_config.NumberColumn("VHP total", format="%.0f"),
+                "VHR_total": st.column_config.NumberColumn("VHR total", format="%.0f"),
+                "Écart_total": st.column_config.NumberColumn("Écart (h)", format="%.0f"),
+            }
+        )
+
+
 # ====== ANALYSE MENSUELLE ======
 with tab_mensuel:
     st.subheader("Analyse mensuelle — heures réalisées & tendances")
@@ -2039,10 +2165,23 @@ with tab_export:
         ).reset_index()
         synth_class["Taux_moy"] = (synth_class["Taux_moy"]*100).round(2)
 
+        synth_resp = filtered.groupby("Responsable").agg(
+            Matieres=("Matière","count"),
+            Classes=("Classe","nunique"),
+            VHP_total=("VHP","sum"),
+            VHR_total=("VHR","sum"),
+            Taux_moy=("Taux","mean"),
+            Retard_h=("Écart", lambda s: float(s[s<0].sum())),
+            Non_demarre=("Statut_auto", lambda s: int((s=="Non démarré").sum())),
+        ).reset_index()
+        synth_resp["Taux_moy"] = (synth_resp["Taux_moy"]*100).round(2)
+
         xbytes = df_to_excel_bytes({
             "Consolidé": export_df,
             "Synthese_Classes": synth_class,
+            "Synthese_Responsables": synth_resp,
         })
+
 
         st.download_button(
             "⬇️ Télécharger l’Excel consolidé",

@@ -602,6 +602,33 @@ button[kind="primary"] div{
   color: var(--text);
   font-weight: 900;
 }
+/* =========================
+   BADGES STATUT (PRO)
+========================= */
+.badge{
+  display:inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 12px;
+  line-height: 1;
+  border: 1px solid rgba(227,232,240,0.95);
+}
+.badge-ok{
+  background: rgba(30,142,62,0.12);
+  color: #1E8E3E;
+  border-color: rgba(30,142,62,0.25);
+}
+.badge-warn{
+  background: rgba(242,153,0,0.14);
+  color: #B26A00;
+  border-color: rgba(242,153,0,0.30);
+}
+.badge-bad{
+  background: rgba(217,48,37,0.12);
+  color: #D93025;
+  border-color: rgba(217,48,37,0.25);
+}
 
 
 </style>

@@ -630,18 +630,6 @@ button[kind="primary"] div{
   border-color: rgba(217,48,37,0.25);
 }
 
-.badge{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-weight: 900;
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-
 </style>
 """,
 unsafe_allow_html=True
@@ -1958,30 +1946,32 @@ with tab_classes:
     st.dataframe(comp, use_container_width=True)
 
     st.write(f"### Retards (Top 15) — {cls1}")
-    tA = A.sort_values("Écart").head(15)[
-    ["Matière","VHP","VHR","Écart","Taux","Statut_auto","Observations"]
-    ].copy()
+    tA = A.sort_values("Écart").head(15)[["Matière","VHP","VHR","Écart","Taux","Statut_auto","Observations"]].copy()
     tA["Taux (%)"] = (tA["Taux"] * 100).round(1)
-
-    render_badged_table(
-        tA,
-        columns=["Matière","VHP","VHR","Écart","Taux (%)","Statut_badge","Observations"],
-        title=f"### Retards (Top 15) — {cls1}"
+    st.dataframe(
+        tA[["Matière","VHP","VHR","Écart","Taux (%)","Statut_auto","Observations"]],
+        use_container_width=True,
+        column_config={
+            "Taux (%)": st.column_config.ProgressColumn("Taux (%)", min_value=0.0, max_value=100.0, format="%.1f%%"),
+            "Écart": st.column_config.NumberColumn("Écart (h)", format="%.0f"),
+            "VHP": st.column_config.NumberColumn("VHP", format="%.0f"),
+            "VHR": st.column_config.NumberColumn("VHR", format="%.0f"),
+        }
     )
-
 
     st.write(f"### Retards (Top 15) — {cls2}")
-    tB = B.sort_values("Écart").head(15)[
-    ["Matière","VHP","VHR","Écart","Taux","Statut_auto","Observations"]
-    ].copy()
+    tB = B.sort_values("Écart").head(15)[["Matière","VHP","VHR","Écart","Taux","Statut_auto","Observations"]].copy()
     tB["Taux (%)"] = (tB["Taux"] * 100).round(1)
-
-    render_badged_table(
-        tB,
-        columns=["Matière","VHP","VHR","Écart","Taux (%)","Statut_badge","Observations"],
-        title=f"### Retards (Top 15) — {cls2}"
+    st.dataframe(
+        tB[["Matière","VHP","VHR","Écart","Taux (%)","Statut_auto","Observations"]],
+        use_container_width=True,
+        column_config={
+            "Taux (%)": st.column_config.ProgressColumn("Taux (%)", min_value=0.0, max_value=100.0, format="%.1f%%"),
+            "Écart": st.column_config.NumberColumn("Écart (h)", format="%.0f"),
+            "VHP": st.column_config.NumberColumn("VHP", format="%.0f"),
+            "VHR": st.column_config.NumberColumn("VHR", format="%.0f"),
+        }
     )
-
 
 
 # ====== PAR MATIÈRE ======

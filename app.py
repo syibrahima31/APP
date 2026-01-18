@@ -2201,9 +2201,39 @@ with tab_alertes:
     c1, c2 = st.columns(2)
     with c1:
         st.write("### Liste des alertes (priorisées)")
-        alerts = tmp.loc[tmp["Critique"] | (tmp["Niveau"]=="Rouge"), ["Classe","Matière","VHP","VHR","Écart","Taux","Statut_auto","Niveau","Observations"]].copy()
-        alerts["Taux"] = (alerts["Taux"]*100).round(1).astype(str)+"%"
-        st.dataframe(alerts.head(50), use_container_width=True)
+
+        alerts = tmp.loc[
+            tmp["Critique"] | (tmp["Niveau"] == "Rouge"),
+            ["Classe","Matière","VHP","VHR","Écart","Taux","Statut_auto","Niveau","Observations"]
+        ].copy()
+
+        # 1) Taux en %
+        alerts["Taux (%)"] = (alerts["Taux"] * 100).round(1)
+
+        # 2) Statut avec emoji (comme "Par classe")
+        alerts["Statut"] = alerts["Statut_auto"].apply(statut_badge_text)
+
+        def niveau_emoji(n):
+            n = str(n).strip()
+            if n == "Vert": return "🟢 Vert"
+            if n == "Orange": return "🟠 Orange"
+            return "🔴 Rouge"
+
+        alerts["Niveau"] = alerts["Niveau"].apply(niveau_emoji)
+
+
+        # 3) Affichage (on cache Statut_auto)
+        st.dataframe(
+            alerts[["Classe","Matière","VHP","VHR","Écart","Taux (%)","Statut","Niveau","Observations"]].head(50),
+            use_container_width=True,
+            column_config={
+                "Taux (%)": st.column_config.ProgressColumn("Taux (%)", min_value=0.0, max_value=100.0, format="%.1f%%"),
+                "Écart": st.column_config.NumberColumn("Écart (h)", format="%.0f"),
+                "VHP": st.column_config.NumberColumn("VHP", format="%.0f"),
+                "VHR": st.column_config.NumberColumn("VHR", format="%.0f"),
+            }
+        )
+
 
     with c2:
         st.write("### Alerte “Non démarré” par classe")

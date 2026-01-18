@@ -1968,25 +1968,22 @@ with tab_classes:
     ].copy()
 
     tA["Taux (%)"] = (tA["Taux"] * 100).round(1)
-    tA["Statut_badge"] = tA["Statut_auto"].apply(statut_badge_text)
-    tA["Niveau"] = tA["Statut_auto"].apply(niveau_from_statut)
+    tA["Statut"] = tA["Statut_auto"].apply(statut_badge_text)
 
     st.dataframe(
-        tA[["Matière","VHP","VHR","Écart","Taux (%)","Statut_badge","Niveau","Observations"]],
+        tA[["Matière","VHP","VHR","Écart","Taux (%)","Statut","Observations"]],
         use_container_width=True,
         column_config={
-            "Taux (%)": st.column_config.ProgressColumn("Taux (%)", min_value=0.0, max_value=100.0, format="%.1f%%"),
+            "Taux (%)": st.column_config.ProgressColumn(
+                "Taux (%)", min_value=0.0, max_value=100.0, format="%.1f%%"
+            ),
             "Écart": st.column_config.NumberColumn("Écart (h)", format="%.0f"),
             "VHP": st.column_config.NumberColumn("VHP", format="%.0f"),
             "VHR": st.column_config.NumberColumn("VHR", format="%.0f"),
-            "Niveau": st.column_config.SelectboxColumn(
-                "Niveau",
-                options=["OK", "ATTENTION", "CRITIQUE"],
-                help="Indicateur synthétique basé sur le statut",
-            ),
-            "Statut_badge": st.column_config.TextColumn("Statut"),
+            "Statut": st.column_config.TextColumn("Statut"),
         }
     )
+
 
 
     st.write(f"### Retards (Top 15) — {cls2}")
@@ -1995,21 +1992,22 @@ with tab_classes:
     ].copy()
 
     tB["Taux (%)"] = (tB["Taux"] * 100).round(1)
-    tB["Statut_badge"] = tB["Statut_auto"].apply(statut_badge_text)
-    tB["Niveau"] = tB["Statut_auto"].apply(niveau_from_statut)
+    tB["Statut"] = tB["Statut_auto"].apply(statut_badge_text)
 
     st.dataframe(
-        tB[["Matière","VHP","VHR","Écart","Taux (%)","Statut_badge","Niveau","Observations"]],
+        tB[["Matière","VHP","VHR","Écart","Taux (%)","Statut","Observations"]],
         use_container_width=True,
         column_config={
-            "Taux (%)": st.column_config.ProgressColumn("Taux (%)", min_value=0.0, max_value=100.0, format="%.1f%%"),
+            "Taux (%)": st.column_config.ProgressColumn(
+                "Taux (%)", min_value=0.0, max_value=100.0, format="%.1f%%"
+            ),
             "Écart": st.column_config.NumberColumn("Écart (h)", format="%.0f"),
             "VHP": st.column_config.NumberColumn("VHP", format="%.0f"),
             "VHR": st.column_config.NumberColumn("VHR", format="%.0f"),
-            "Niveau": st.column_config.SelectboxColumn("Niveau", options=["OK","ATTENTION","CRITIQUE"]),
-            "Statut_badge": st.column_config.TextColumn("Statut"),
+            "Statut": st.column_config.TextColumn("Statut"),
         }
     )
+
 
 
 

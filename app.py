@@ -630,7 +630,6 @@ button[kind="primary"] div{
   border-color: rgba(217,48,37,0.25);
 }
 
-
 </style>
 """,
 unsafe_allow_html=True
@@ -1843,6 +1842,15 @@ with tab_overview:
 
 
     # + une version dataframe colorée (optionnel, très utile)
+
+    top_retards_badged = add_badges(top_retards)
+
+    html_table = top_retards_badged[
+        ["Classe","Matière","VHP","VHR","Écart","Taux","Statut_badge","Observations"]
+    ].to_html(escape=False, index=False, classes="iaid-table")
+
+    st.markdown(f'<div class="table-wrap">{html_table}</div>', unsafe_allow_html=True
+
     st.dataframe(
     top_retards[["Classe","Matière","VHP","VHR","Écart","Taux","Statut_auto","Observations"]],
     use_container_width=True,

@@ -630,6 +630,18 @@ button[kind="primary"] div{
   border-color: rgba(217,48,37,0.25);
 }
 
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+
 </style>
 """,
 unsafe_allow_html=True
@@ -904,17 +916,30 @@ def send_email_reminder(
 
 
 
-def add_badges(df: pd.DataFrame) -> pd.DataFrame:
+def add_badges(df: pd.DataFrame, status_col: str = "Statut_auto") -> pd.DataFrame:
     out = df.copy()
+
+    if status_col not in out.columns:
+        # fallback
+        if "Statut_auto" in out.columns:
+            status_col = "Statut_auto"
+        elif "Statut" in out.columns:
+            status_col = "Statut"
+        else:
+            out["Statut_badge"] = ""
+            return out
+
     def badge(statut: str) -> str:
-        s = str(statut)
+        s = str(statut).strip()
         if s == "Terminé":
             return '<span class="badge badge-ok">✅ Terminé</span>'
         if s == "En cours":
             return '<span class="badge badge-warn">🟠 En cours</span>'
         return '<span class="badge badge-bad">🔴 Non démarré</span>'
-    out["Statut_badge"] = out["Statut_auto"].apply(badge)
+
+    out["Statut_badge"] = out[status_col].apply(badge)
     return out
+
 
 def style_table(df: pd.DataFrame) -> pd.DataFrame:
     # On renvoie un dataframe "propre" (sans Styler)
@@ -925,6 +950,20 @@ def style_table(df: pd.DataFrame) -> pd.DataFrame:
         out["Taux (%)"] = (out["Taux"] * 100).round(1)
 
     return out
+
+def render_badged_table(df: pd.DataFrame, columns: List[str], title: str = "") -> None:
+    if title:
+        st.write(title)
+
+    tmp = add_badges(df)
+
+    # si la colonne badge est demandée mais n'existe pas dans columns, on l'ajoute
+    if "Statut_badge" in tmp.columns and "Statut_badge" in columns:
+        pass
+
+    html = tmp[columns].to_html(escape=False, index=False, classes="iaid-table")
+    st.markdown(f'<div class="table-wrap">{html}</div>', unsafe_allow_html=True)
+
 
 # -----------------------------
 # Lecture Excel multi-feuilles
@@ -1919,32 +1958,30 @@ with tab_classes:
     st.dataframe(comp, use_container_width=True)
 
     st.write(f"### Retards (Top 15) — {cls1}")
-    tA = A.sort_values("Écart").head(15)[["Matière","VHP","VHR","Écart","Taux","Statut_auto","Observations"]].copy()
+    tA = A.sort_values("Écart").head(15)[
+    ["Matière","VHP","VHR","Écart","Taux","Statut_auto","Observations"]
+    ].copy()
     tA["Taux (%)"] = (tA["Taux"] * 100).round(1)
-    st.dataframe(
-        tA[["Matière","VHP","VHR","Écart","Taux (%)","Statut_auto","Observations"]],
-        use_container_width=True,
-        column_config={
-            "Taux (%)": st.column_config.ProgressColumn("Taux (%)", min_value=0.0, max_value=100.0, format="%.1f%%"),
-            "Écart": st.column_config.NumberColumn("Écart (h)", format="%.0f"),
-            "VHP": st.column_config.NumberColumn("VHP", format="%.0f"),
-            "VHR": st.column_config.NumberColumn("VHR", format="%.0f"),
-        }
+
+    render_badged_table(
+        tA,
+        columns=["Matière","VHP","VHR","Écart","Taux (%)","Statut_badge","Observations"],
+        title=f"### Retards (Top 15) — {cls1}"
     )
 
+
     st.write(f"### Retards (Top 15) — {cls2}")
-    tB = B.sort_values("Écart").head(15)[["Matière","VHP","VHR","Écart","Taux","Statut_auto","Observations"]].copy()
+    tB = B.sort_values("Écart").head(15)[
+    ["Matière","VHP","VHR","Écart","Taux","Statut_auto","Observations"]
+    ].copy()
     tB["Taux (%)"] = (tB["Taux"] * 100).round(1)
-    st.dataframe(
-        tB[["Matière","VHP","VHR","Écart","Taux (%)","Statut_auto","Observations"]],
-        use_container_width=True,
-        column_config={
-            "Taux (%)": st.column_config.ProgressColumn("Taux (%)", min_value=0.0, max_value=100.0, format="%.1f%%"),
-            "Écart": st.column_config.NumberColumn("Écart (h)", format="%.0f"),
-            "VHP": st.column_config.NumberColumn("VHP", format="%.0f"),
-            "VHR": st.column_config.NumberColumn("VHR", format="%.0f"),
-        }
+
+    render_badged_table(
+        tB,
+        columns=["Matière","VHP","VHR","Écart","Taux (%)","Statut_badge","Observations"],
+        title=f"### Retards (Top 15) — {cls2}"
     )
+
 
 
 # ====== PAR MATIÈRE ======

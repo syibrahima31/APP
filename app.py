@@ -2213,13 +2213,7 @@ with tab_alertes:
         # 2) Statut avec emoji (comme "Par classe")
         alerts["Statut"] = alerts["Statut_auto"].apply(statut_badge_text)
 
-        def niveau_emoji(n):
-            n = str(n).strip()
-            if n == "Vert": return "🟢 Vert"
-            if n == "Orange": return "🟠 Orange"
-            return "🔴 Rouge"
-
-        alerts["Niveau"] = alerts["Niveau"].apply(niveau_emoji)
+    
 
 
         # 3) Affichage (on cache Statut_auto)

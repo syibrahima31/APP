@@ -2462,6 +2462,131 @@ with tab_alertes:
 
                         subject_prof = f"IAID — Alerte enseignements ({mois_min}→{mois_max}) : {len(gprof)} module(s)"
 
+                        # ==============================
+                        # HTML PROF (STYLE DG) — CORPS JOLI
+                        # ==============================
+                        def statut_chip_html(statut: str) -> str:
+                            s = str(statut).strip()
+                            if s == "Terminé":
+                                return '<span style="display:inline-block;padding:6px 10px;border-radius:999px;font-weight:900;font-size:12px;background:rgba(30,142,62,0.12);color:#1E8E3E;border:1px solid rgba(30,142,62,0.25);">✅ Terminé</span>'
+                            if s == "En cours":
+                                return '<span style="display:inline-block;padding:6px 10px;border-radius:999px;font-weight:900;font-size:12px;background:rgba(242,153,0,0.14);color:#B26A00;border:1px solid rgba(242,153,0,0.30);">🟠 En cours</span>'
+                            return '<span style="display:inline-block;padding:6px 10px;border-radius:999px;font-weight:900;font-size:12px;background:rgba(217,48,37,0.12);color:#D93025;border:1px solid rgba(217,48,37,0.25);">🔴 Non démarré</span>'
+
+                        lignes_html = ""
+                        for _, r in gprof.sort_values(["Écart"], ascending=[False, True]).iterrows():
+                            # Sécuriser valeurs
+                            classe = str(r.get("Classe", ""))
+                            sem = str(r.get("Semestre", ""))
+                            mat = str(r.get("Matière", ""))[:70]
+                            vhp = int(float(r.get("VHP", 0) or 0))
+                            vhr = int(float(r.get("VHR", 0) or 0))
+                            ec  = int(float(r.get("Écart", 0) or 0))
+                            raison = str(r.get("Raison_alerte", ""))
+                            statut = str(r.get("Statut_auto", ""))
+
+                            ec_color = "#D93025" if ec <= thresholds["ecart_critique"] else "#0F172A"
+
+                            lignes_html += f"""
+                            <tr>
+                              <td style="padding:10px;border-bottom:1px solid #E3E8F0;">{classe}</td>
+                              <td style="padding:10px;border-bottom:1px solid #E3E8F0;">{sem}</td>
+                              <td style="padding:10px;border-bottom:1px solid #E3E8F0;">{mat}</td>
+                              <td style="padding:10px;border-bottom:1px solid #E3E8F0;text-align:center;">{vhp}</td>
+                              <td style="padding:10px;border-bottom:1px solid #E3E8F0;text-align:center;">{vhr}</td>
+                              <td style="padding:10px;border-bottom:1px solid #E3E8F0;text-align:center;font-weight:900;color:{ec_color};">{ec}</td>
+                              <td style="padding:10px;border-bottom:1px solid #E3E8F0;">{statut_chip_html(statut)}</td>
+                              <td style="padding:10px;border-bottom:1px solid #E3E8F0;">{raison}</td>
+                            </tr>
+                            """
+
+                        body_html_prof = f"""
+                        <!doctype html>
+                        <html>
+                        <body style="margin:0;padding:0;background:#0B3D91;">
+                          <div style="background:linear-gradient(180deg,#0B3D91 0%,#134FA8 100%);padding:34px 12px;">
+
+                            <div style="max-width:860px;margin:0 auto;background:#FFFFFF;border-radius:20px;
+                                        box-shadow:0 20px 50px rgba(0,0,0,0.25);overflow:hidden;
+                                        font-family:Arial,Helvetica,sans-serif;color:#0F172A;">
+
+                              <!-- EN-TÊTE -->
+                              <div style="padding:22px 26px;background:linear-gradient(90deg,#0B3D91,#1F6FEB);color:#FFFFFF;">
+                                <div style="font-size:18px;font-weight:900;">
+                                  IAID — Notification Enseignant
+                                </div>
+                                <div style="margin-top:6px;font-size:13px;font-weight:700;opacity:.95;">
+                                  Lot : {lot} • Période : {mois_min} → {mois_max}
+                                </div>
+                                <div style="margin-top:6px;font-size:12px;font-weight:700;opacity:.9;">
+                                  Mise à jour : {dt.datetime.now().strftime('%d/%m/%Y %H:%M')}
+                                </div>
+                              </div>
+
+                              <!-- CONTENU -->
+                              <div style="padding:26px;line-height:1.55;">
+                                <p style="margin-top:0;">
+                                  Bonjour <b>{prof}</b>,
+                                </p>
+
+                                <p>
+                                  Vous avez <b>{len(gprof)} matière(s)</b> concernée(s) par l'envoi :
+                                  <b>{lot}</b>. Merci de vérifier / mettre à jour les heures réalisées.
+                                </p>
+
+                                <!-- TABLE -->
+                                <div style="margin:18px 0;border:1px solid #E3E8F0;border-radius:14px;overflow:hidden;">
+                                  <table style="border-collapse:collapse;width:100%;font-size:13px;">
+                                    <thead>
+                                      <tr style="background:#F6F8FC;">
+                                        <th style="padding:10px;text-align:left;border-bottom:1px solid #E3E8F0;">Classe</th>
+                                        <th style="padding:10px;text-align:left;border-bottom:1px solid #E3E8F0;">Sem</th>
+                                        <th style="padding:10px;text-align:left;border-bottom:1px solid #E3E8F0;">Matière</th>
+                                        <th style="padding:10px;text-align:center;border-bottom:1px solid #E3E8F0;">VHP</th>
+                                        <th style="padding:10px;text-align:center;border-bottom:1px solid #E3E8F0;">VHR</th>
+                                        <th style="padding:10px;text-align:center;border-bottom:1px solid #E3E8F0;">Écart</th>
+                                        <th style="padding:10px;text-align:left;border-bottom:1px solid #E3E8F0;">Statut</th>
+                                        <th style="padding:10px;text-align:left;border-bottom:1px solid #E3E8F0;">Raison</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {lignes_html}
+                                    </tbody>
+                                  </table>
+                                </div>
+
+                                <!-- BOUTON -->
+                                <div style="text-align:center;margin:20px 0;">
+                                  <a href="{dashboard_url}" style="
+                                      display:inline-block;background:#0B3D91;color:#FFFFFF;text-decoration:none;
+                                      padding:14px 22px;border-radius:14px;font-weight:900;font-size:14px;
+                                      box-shadow:0 10px 24px rgba(14,30,37,0.25);">
+                                      Ouvrir le Dashboard IAID →
+                                  </a>
+                                </div>
+
+                                <!-- BLOC RAPPEL -->
+                                <div style="margin-top:18px;background:#F6F8FC;border:1px solid #E3E8F0;border-radius:14px;padding:14px 16px;">
+                                  <div style="font-weight:900;color:#0B3D91;margin-bottom:6px;">📌 Rappel</div>
+                                  <div style="font-size:13px;">
+                                    Merci de renseigner les heures par mois et les observations si nécessaire.
+                                  </div>
+                                </div>
+                              </div>
+
+                              <!-- FOOTER -->
+                              <div style="padding:14px 26px;background:#FBFCFF;border-top:1px solid #E3E8F0;
+                                          font-size:12px;color:#475569;text-align:center;">
+                                Message automatique — Département IA &amp; Ingénierie des Données (IAID)
+                              </div>
+
+                            </div>
+                          </div>
+                        </body>
+                        </html>
+                        """
+
+
                         # HTML léger (facultatif). Ici on envoie juste texte (plus fiable).
                         try:
                             send_email_reminder(
@@ -2473,7 +2598,7 @@ with tab_alertes:
                                 recipients=[mail],
                                 subject=subject_prof,
                                 body_text=body_text_prof,
-                                body_html=None
+                                body_html=body_html_prof
                             )
                             sent += 1
                         except Exception as e:

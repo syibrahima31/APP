@@ -1422,13 +1422,14 @@ with st.sidebar:
         st.markdown('</div>', unsafe_allow_html=True)
     else:
         st.markdown(
-            """
-            <div class="sidebar-logo-wrap" style="font-weight:950;color:#0B3D91;font-size:18px;">
-            {DEPT_CODE}
+            f"""
+            <div class="sidebar-logo-wrap" style="font-weight:950;color:#0B3D91;font-size:18px; text-align:center;">
+                {DEPT_CODE}
             </div>
             """,
             unsafe_allow_html=True
         )
+
 
     st.divider()
 
@@ -2775,8 +2776,8 @@ with tab_export:
                 author_name=HEAD_NAME,
                 assistant_name=ASSIST_NAME if ASSIST_NAME else "—",
                 department=DEPT_NAME,
-                institution=INSTITUTION_NAME
-
+                institution=INSTITUTION_NAME,
+            )
 
             st.download_button(
                 "⬇️ Télécharger le PDF",
@@ -2785,6 +2786,7 @@ with tab_export:
                 mime="application/pdf",
                 key="dl_pdf"
             )
+
 
 
 

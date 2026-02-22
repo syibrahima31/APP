@@ -2065,6 +2065,10 @@ if show_only_delay:
 # -----------------------------
 filtered = filtered_base.copy()
 
+# Sécurité : colonnes optionnelles absentes dans certains fichiers Excel (ex: KM)
+for _col in ["Type", "Email", "Début prévu", "Fin prévue", "Responsable", "Observations"]:
+    if _col not in filtered.columns:
+        filtered[_col] = ""
 
 # ✅ Classes réellement disponibles après filtres (important pour l'onglet "Par classe")
 classes_filtered = sorted(filtered["Classe"].dropna().unique().tolist())

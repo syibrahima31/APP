@@ -244,6 +244,8 @@ Format: Markdown.
 st.markdown(
 """
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+
 /* =========================================================
    IAID — THÈME DARK EXÉCUTIF (INSPIRÉ DASHBOARD FUTURISTE)
    Navy sombre • Glow effects • Design moderne
@@ -995,6 +997,188 @@ button[kind="secondary"] *{
   }
 }
 
+/* =========================================================
+   DESIGN v2 — Font • Animations • Glassmorphisme • Tables
+   ========================================================= */
+
+/* 1. FONT PREMIUM — Space Grotesk */
+html, body, .stApp, button, input, select, textarea,
+div[data-testid], p, span, label, th, td, li {
+  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif !important;
+}
+
+/* 2. GRILLE DE POINTS EN FOND (effet futuriste) */
+.stApp::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(31,111,235,0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+.block-container { position: relative; z-index: 1; }
+section[data-testid="stSidebar"] { position: relative; z-index: 2; }
+
+/* 3. KEYFRAMES */
+@keyframes shimmer-bar {
+  0%   { background-position: -300% center; }
+  100% { background-position:  300% center; }
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.60; }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 4. SHIMMER ANIMÉ SUR LES BARRES KPI */
+.kpi::before {
+  background-size: 300% auto !important;
+  animation: shimmer-bar 4s linear infinite !important;
+}
+.kpi:not(.kpi-good):not(.kpi-warn):not(.kpi-bad)::before {
+  background-image: linear-gradient(90deg, var(--blue), #00C9FF, #5AA2FF, var(--blue)) !important;
+}
+.kpi-good::before {
+  background-image: linear-gradient(90deg, var(--ok), #00FFA3, #00E090, var(--ok)) !important;
+}
+.kpi-warn::before {
+  background-image: linear-gradient(90deg, var(--warn), #FFD060, #FFAA00, var(--warn)) !important;
+}
+.kpi-bad::before {
+  background-image: linear-gradient(90deg, var(--bad), #FF7070, #FF4444, var(--bad)) !important;
+}
+
+/* 5. GLASSMORPHISME SUR KPI */
+.kpi {
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+.kpi-good:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 0 22px rgba(0,201,122,0.14) !important; }
+.kpi-warn:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 0 22px rgba(255,149,0,0.14) !important; }
+.kpi-bad:hover  { box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 0 22px rgba(255,59,59,0.14) !important; }
+
+/* 6. FADE-UP AU CHANGEMENT D'ONGLET */
+div[role="tabpanel"] {
+  animation: fade-up 0.22s ease;
+}
+
+/* 7. TABLES HTML (.iaid-table) — design complet */
+.iaid-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  color: var(--text);
+}
+.iaid-table thead tr {
+  background: linear-gradient(90deg, #0A2860 0%, #1A4DB5 100%);
+}
+.iaid-table thead th {
+  padding: 10px 14px;
+  color: #fff !important;
+  font-weight: 800 !important;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+  border: none !important;
+}
+.iaid-table thead th:first-child { border-radius: 12px 0 0 0; }
+.iaid-table thead th:last-child  { border-radius: 0 12px 0 0; }
+.iaid-table tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.13s ease;
+}
+.iaid-table tbody tr:nth-child(even) { background: rgba(255,255,255,0.025); }
+.iaid-table tbody tr:hover            { background: rgba(31,111,235,0.10) !important; }
+.iaid-table tbody td {
+  padding: 9px 14px;
+  color: var(--text) !important;
+  vertical-align: middle;
+}
+
+/* 8. ST.METRIC — premium */
+div[data-testid="metric-container"] {
+  background: linear-gradient(135deg, var(--card) 0%, var(--card2) 100%) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 18px !important;
+  padding: 14px 18px !important;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.35) !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease !important;
+}
+div[data-testid="metric-container"]:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.50) !important;
+}
+div[data-testid="stMetricValue"] > div {
+  font-weight: 950 !important;
+  letter-spacing: -0.5px !important;
+}
+div[data-testid="stMetricDelta"] {
+  border-radius: 999px !important;
+  padding: 2px 10px !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  display: inline-block !important;
+}
+
+/* 9. BARRE DE PROGRESSION DÉGRADÉE */
+div[data-testid="stProgress"] > div {
+  background: rgba(255,255,255,0.07) !important;
+  border-radius: 999px !important;
+}
+div[data-testid="stProgress"] > div > div > div {
+  background: linear-gradient(90deg, var(--blue), #00C9FF) !important;
+  border-radius: 999px !important;
+}
+
+/* 10. EXPANDERS */
+div[data-testid="stExpander"] {
+  background: var(--card) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  margin-bottom: 8px !important;
+}
+div[data-testid="stExpander"] summary {
+  font-weight: 800 !important;
+  padding: 12px 16px !important;
+}
+
+/* 11. BADGE WARN — pulse discret */
+.badge-warn {
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+/* 12. SIDEBAR — ligne décorative dégradée */
+section[data-testid="stSidebar"]::after {
+  content: "";
+  position: absolute;
+  top: 10%; right: 0;
+  width: 1px; height: 80%;
+  background: linear-gradient(180deg, transparent, rgba(31,111,235,0.45), transparent);
+  pointer-events: none;
+}
+
+/* 13. CHECKBOX & RADIO — dark */
+div[data-baseweb="checkbox"] span,
+div[data-baseweb="radio"] span {
+  border-color: rgba(90,162,255,0.40) !important;
+}
+div[data-baseweb="checkbox"] [aria-checked="true"] span,
+div[data-baseweb="radio"] [aria-checked="true"] span {
+  background: var(--blue) !important;
+  border-color: var(--blue) !important;
+}
+
+/* 14. SLIDER */
+div[data-testid="stSlider"] div[role="slider"] {
+  background: var(--blue) !important;
+  box-shadow: 0 0 12px var(--blue-glow) !important;
+}
 
 
 """,

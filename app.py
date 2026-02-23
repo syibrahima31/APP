@@ -331,12 +331,6 @@ header[data-testid="stHeader"]{
   height: 0px !important;
 }
 
-/* Cacher les boutons toggle de la sidebar */
-[data-testid="stSidebarCollapseButton"],
-button[data-testid="stSidebarCollapsedControl"] {
-  display: none !important;
-}
-
 /* Scrollbar dark */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg2); }
@@ -344,16 +338,11 @@ button[data-testid="stSidebarCollapsedControl"] {
 ::-webkit-scrollbar-thumb:hover { background: rgba(90,162,255,0.45); }
 
 /* -----------------------------
-   SIDEBAR — forcée toujours visible
+   SIDEBAR
 ------------------------------*/
 section[data-testid="stSidebar"]{
   background: var(--bg2) !important;
   border-right: 1px solid var(--line);
-  transform: translateX(0px) !important;
-  visibility: visible !important;
-  display: flex !important;
-  min-width: 240px !important;
-  width: auto !important;
 }
 .sidebar-card{
   background: var(--card);

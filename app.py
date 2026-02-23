@@ -331,26 +331,11 @@ header[data-testid="stHeader"]{
   height: 0px !important;
 }
 
-/* Garder la toolbar visible (requis pour que le bouton sidebar fonctionne) */
-div[data-testid="stToolbar"]{
-  visibility: visible !important;
-  height: auto !important;
-}
-
-/* Bouton d'ouverture/fermeture de la sidebar */
-button[data-testid="stSidebarCollapsedControl"]{
-  display: inline-flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* Masquer uniquement le libellé texte du raccourci clavier
-   affiché à côté des boutons de la toolbar (⌨️ ⏩)
-   sans retirer les boutons du DOM */
-div[data-testid="stToolbar"] button > span:not(:has(svg)),
-div[data-testid="stToolbar"] button > div:not(:has(svg)),
-div[data-testid="stToolbar"] [class*="shortcut"],
-div[data-testid="stToolbar"] kbd {
+/* Supprimer les boutons toggle de la sidebar (fermeture + réouverture).
+   La sidebar reste toujours visible : initial_sidebar_state="expanded"
+   Plus de risque de la perdre, plus de texte ⌨️⏩ affiché. */
+[data-testid="stSidebarCollapseButton"],
+button[data-testid="stSidebarCollapsedControl"] {
   display: none !important;
 }
 

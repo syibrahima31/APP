@@ -195,6 +195,7 @@ def unpivot_months(df: pd.DataFrame) -> pd.DataFrame:
     return long
 
 
+@st.cache_data(show_spinner=False, max_entries=5)
 def df_to_excel_bytes(sheets: Dict[str, pd.DataFrame]) -> bytes:
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:

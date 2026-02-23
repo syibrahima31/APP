@@ -2689,17 +2689,16 @@ with tab_alertes:
     )
     tmp["Alerte_fin_depassee"] = (tmp["Statut_auto"] != "Terminé") & tmp["Fin_dt"].notna() & (tmp["Fin_dt"] < today_dt)
 
-    def raison_alerte(row):
-        reasons = []
-        if bool(row.get("Alerte_fin_depassee", False)):
-            reasons.append("⛔ Fin dépassée")
-        if bool(row.get("Alerte_retard_critique", False)):
-            reasons.append("🔻 Retard critique")
-        if bool(row.get("Alerte_non_demarre", False)):
-            reasons.append("🛑 Non démarré")
-        return " • ".join(reasons)
-
-    tmp["Raison_alerte"] = tmp.apply(raison_alerte, axis=1)
+    # Vectorized (évite apply row-by-row, ~10x plus rapide)
+    _fin = np.where(tmp["Alerte_fin_depassee"], "⛔ Fin dépassée", "")
+    _ret = np.where(tmp["Alerte_retard_critique"], "🔻 Retard critique", "")
+    _nd  = np.where(tmp["Alerte_non_demarre"], "🛑 Non démarré", "")
+    _sep1 = np.where((_fin != "") & (_ret != ""), " • ", "")
+    _ab   = np.char.add(np.char.add(_fin, _sep1), _ret)
+    _sep2 = np.where((_ab != "") & (_nd != ""), " • ", "")
+    tmp["Raison_alerte"] = pd.Series(
+        np.char.add(np.char.add(_ab, _sep2), _nd), index=tmp.index
+    )
     tmp["En_alerte"] = tmp["Raison_alerte"].ne("")
 
     # Priorité (fin dépassée > retard critique > non démarré) puis écart

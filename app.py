@@ -338,16 +338,18 @@ div[data-testid="stToolbar"]{
 }
 
 /* Cacher les boutons natifs Streamlit (⌨️ raccourcis, ⏩ relancer)
-   sans toucher au bouton d'ouverture de la sidebar */
-div[data-testid="stToolbar"] button,
-div[data-testid="stToolbar"] a,
-div[data-testid="stAppToolbar"] button,
-div[data-testid="stAppToolbar"] a {
+   en excluant explicitement le contrôle de la sidebar via :not() */
+div[data-testid="stToolbar"] button:not([data-testid="stSidebarCollapsedControl"]),
+div[data-testid="stToolbar"] a:not([data-testid="stSidebarCollapsedControl"]),
+div[data-testid="stAppToolbar"] button:not([data-testid="stSidebarCollapsedControl"]),
+div[data-testid="stAppToolbar"] a:not([data-testid="stSidebarCollapsedControl"]) {
   display: none !important;
 }
 
-/* Conserver le bouton d'ouverture de la sidebar */
-button[data-testid="stSidebarCollapsedControl"]{
+/* Conserver le bouton d'ouverture de la sidebar — priorité maximale */
+button[data-testid="stSidebarCollapsedControl"],
+div[data-testid="stToolbar"] button[data-testid="stSidebarCollapsedControl"],
+div[data-testid="stAppToolbar"] button[data-testid="stSidebarCollapsedControl"] {
   display: inline-flex !important;
   visibility: visible !important;
   opacity: 1 !important;

@@ -48,32 +48,87 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df.columns = [clean_colname(c) for c in df.columns]
     rename_map = {
+        # ── Taux ──
         "Taux (%)": "Taux_excel",
         "Taux": "Taux_excel",
+        # ── Écart ──
         "Ecart": "Écart",
         "Écart": "Écart",
+        # ── VHR ──
         "Vhr": "VHR",
+        "VH Réalisé": "VHR",
+        "VH Realise": "VHR",
+        "Volume Réalisé": "VHR",
+        "Heures réalisées": "VHR",
+        "Heures Réalisées": "VHR",
+        # ── VHP (nombreux alias selon les templates KM/DRS) ──
         "VHP ": "VHP",
+        "VH Prévu": "VHP",
+        "VH Prevu": "VHP",
+        "VH_Prévu": "VHP",
+        "VH Annuel": "VHP",
+        "VH Prévu(H)": "VHP",
+        "Volume Prévu": "VHP",
+        "Volume Horaire Prévu": "VHP",
+        "Volume Horaire": "VHP",
+        "Heures prévues": "VHP",
+        "Heures Prévues": "VHP",
+        "H. Prévu": "VHP",
+        "H Prévu": "VHP",
+        # ── Matière (alias fréquents dans les établissements) ──
         "Matiere": "Matière",
         "Matière ": "Matière",
+        "Matieres": "Matière",
+        "Matières": "Matière",
+        "Intitulé": "Matière",
+        "Intitule": "Matière",
+        "Intitulé du cours": "Matière",
+        "Module": "Matière",
+        "Libellé": "Matière",
+        "Libelle": "Matière",
+        "UE": "Matière",
+        "EC": "Matière",
+        "Cours": "Matière",
+        "Enseignement": "Matière",
+        # ── Responsable ──
         "Responsable ": "Responsable",
         "Enseignant": "Responsable",
+        "Enseignant(e)": "Responsable",
         "Prof": "Responsable",
+        "Professeur": "Responsable",
+        "Nom": "Responsable",
+        "Nom enseignant": "Responsable",
+        "Nom Enseignant": "Responsable",
+        "Intervenant": "Responsable",
+        # ── Semestre ──
         "Semestre ": "Semestre",
         "Semester": "Semestre",
+        "Sem": "Semestre",
+        # ── Observations ──
         "Observation": "Observations",
         "Observations ": "Observations",
+        "Remarque": "Observations",
+        "Remarques": "Observations",
+        "Commentaire": "Observations",
+        "Commentaires": "Observations",
+        # ── Dates ──
         "Début prévu ": "Début prévu",
         "Debut prevu": "Début prévu",
         "Début": "Début prévu",
+        "Date début": "Début prévu",
+        "Date Début": "Début prévu",
         "Fin prévue ": "Fin prévue",
         "Fin prevue": "Fin prévue",
         "Fin": "Fin prévue",
+        "Date fin": "Fin prévue",
+        "Date Fin": "Fin prévue",
+        # ── Email ──
         "Mail": "Email",
         "E-mail": "Email",
         "Email ": "Email",
         "Email enseignant": "Email",
         "Email Enseignant": "Email",
+        "Courriel": "Email",
     }
     df = df.rename(columns={k: v for k, v in rename_map.items() if k in df.columns})
     return df
@@ -246,6 +301,27 @@ def fetch_excel_if_changed(url: str, etag_or_lm: str) -> bytes:
     return fetch_excel_from_url(url, etag_or_lm)
 
 
+def _read_sheet_auto_header(
+    xls: pd.ExcelFile, sheet: str, max_header_row: int = 5
+) -> Tuple[pd.DataFrame, int]:
+    """
+    Essaie de lire la feuille avec header=0, 1, 2... jusqu'à trouver
+    'Matière' et 'VHP' (ou leurs alias) parmi les colonnes.
+    Retourne (df normalisé, index du header trouvé).
+    """
+    for h in range(max_header_row + 1):
+        try:
+            df = pd.read_excel(xls, sheet_name=sheet, header=h)
+        except Exception:
+            continue
+        df_norm = normalize_columns(df)
+        if "Matière" in df_norm.columns and "VHP" in df_norm.columns:
+            return df_norm, h
+    # Aucun header valide trouvé : on renvoie header=0 pour le diagnostic
+    df = pd.read_excel(xls, sheet_name=sheet, header=0)
+    return normalize_columns(df), 0
+
+
 @st.cache_data(show_spinner=False)
 def load_excel_all_sheets(file_bytes: bytes) -> Tuple[pd.DataFrame, Dict[str, List[str]]]:
     quality_issues: Dict[str, List[str]] = {}
@@ -254,16 +330,24 @@ def load_excel_all_sheets(file_bytes: bytes) -> Tuple[pd.DataFrame, Dict[str, Li
 
     for sheet in xls.sheet_names:
         try:
-            df = pd.read_excel(xls, sheet_name=sheet)
+            df, header_row = _read_sheet_auto_header(xls, sheet)
         except Exception as e:
             quality_issues.setdefault(sheet, []).append(f"Lecture impossible: {e}")
             continue
 
-        df = normalize_columns(df)
         missing = [col for col in ["Matière", "VHP"] if col not in df.columns]
         if missing:
-            quality_issues.setdefault(sheet, []).append(f"Colonnes manquantes: {', '.join(missing)}")
+            found = [c for c in df.columns if not str(c).startswith("Unnamed")][:12]
+            quality_issues.setdefault(sheet, []).append(
+                f"Colonnes manquantes: {', '.join(missing)} | "
+                f"Colonnes détectées (header={header_row}): {found}"
+            )
             continue
+
+        if header_row > 0:
+            quality_issues.setdefault(sheet, []).append(
+                f"Info: données lues à partir de la ligne {header_row + 1} (lignes titre ignorées)."
+            )
 
         df = ensure_month_cols(df)
         if df.columns.duplicated().any():

@@ -331,9 +331,7 @@ header[data-testid="stHeader"]{
   height: 0px !important;
 }
 
-/* Supprimer les boutons toggle de la sidebar (fermeture + réouverture).
-   La sidebar reste toujours visible : initial_sidebar_state="expanded"
-   Plus de risque de la perdre, plus de texte ⌨️⏩ affiché. */
+/* Cacher les boutons toggle de la sidebar */
 [data-testid="stSidebarCollapseButton"],
 button[data-testid="stSidebarCollapsedControl"] {
   display: none !important;
@@ -346,11 +344,16 @@ button[data-testid="stSidebarCollapsedControl"] {
 ::-webkit-scrollbar-thumb:hover { background: rgba(90,162,255,0.45); }
 
 /* -----------------------------
-   SIDEBAR
+   SIDEBAR — forcée toujours visible
 ------------------------------*/
 section[data-testid="stSidebar"]{
   background: var(--bg2) !important;
   border-right: 1px solid var(--line);
+  transform: translateX(0px) !important;
+  visibility: visible !important;
+  display: flex !important;
+  min-width: 240px !important;
+  width: auto !important;
 }
 .sidebar-card{
   background: var(--card);

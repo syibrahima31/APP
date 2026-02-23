@@ -331,28 +331,27 @@ header[data-testid="stHeader"]{
   height: 0px !important;
 }
 
-/* Toolbar visible (nécessaire pour le fonctionnement du bouton sidebar) */
+/* Garder la toolbar visible (requis pour que le bouton sidebar fonctionne) */
 div[data-testid="stToolbar"]{
   visibility: visible !important;
   height: auto !important;
 }
 
-/* Cacher les boutons natifs Streamlit (⌨️ raccourcis, ⏩ relancer)
-   en excluant explicitement le contrôle de la sidebar via :not() */
-div[data-testid="stToolbar"] button:not([data-testid="stSidebarCollapsedControl"]),
-div[data-testid="stToolbar"] a:not([data-testid="stSidebarCollapsedControl"]),
-div[data-testid="stAppToolbar"] button:not([data-testid="stSidebarCollapsedControl"]),
-div[data-testid="stAppToolbar"] a:not([data-testid="stSidebarCollapsedControl"]) {
-  display: none !important;
-}
-
-/* Conserver le bouton d'ouverture de la sidebar — priorité maximale */
-button[data-testid="stSidebarCollapsedControl"],
-div[data-testid="stToolbar"] button[data-testid="stSidebarCollapsedControl"],
-div[data-testid="stAppToolbar"] button[data-testid="stSidebarCollapsedControl"] {
+/* Bouton d'ouverture/fermeture de la sidebar */
+button[data-testid="stSidebarCollapsedControl"]{
   display: inline-flex !important;
   visibility: visible !important;
   opacity: 1 !important;
+}
+
+/* Masquer uniquement le libellé texte du raccourci clavier
+   affiché à côté des boutons de la toolbar (⌨️ ⏩)
+   sans retirer les boutons du DOM */
+div[data-testid="stToolbar"] button > span:not(:has(svg)),
+div[data-testid="stToolbar"] button > div:not(:has(svg)),
+div[data-testid="stToolbar"] [class*="shortcut"],
+div[data-testid="stToolbar"] kbd {
+  display: none !important;
 }
 
 /* Scrollbar dark */

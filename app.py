@@ -997,6 +997,13 @@ div[data-testid], p, span, label, th, td, li {
   font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif !important;
 }
 
+/* Streamlit utilise des ligatures Material pour certaines icônes (ex: sidebar toggle). */
+[data-testid="stSidebarCollapsedControl"] span,
+[class*="material-symbol"] ,
+[class*="material-icons"] {
+  font-family: "Material Symbols Rounded", "Material Symbols Outlined", "Material Icons" !important;
+}
+
 /* 2. GRILLE DE POINTS EN FOND (effet futuriste) */
 .stApp::after {
   content: "";

@@ -327,9 +327,10 @@ a:hover{ text-decoration: underline; }
   padding-top: .5rem !important;
   padding-bottom: 4.5rem !important;
 }
+/* Garde le header discret sans casser le bouton d'ouverture sidebar */
 header[data-testid="stHeader"]{
-  visibility: hidden !important;
-  height: 0px !important;
+  background: transparent !important;
+  border-bottom: 0 !important;
 }
 
 /* Scrollbar dark */

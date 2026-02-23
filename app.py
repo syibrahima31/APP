@@ -993,7 +993,7 @@ button[kind="secondary"] *{
 
 /* 1. FONT PREMIUM — Space Grotesk */
 html, body, .stApp, button, input, select, textarea,
-div[data-testid], p, span, label, th, td, li {
+div[data-testid], p, label, th, td, li {
   font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif !important;
 }
 

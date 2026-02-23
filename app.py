@@ -331,22 +331,26 @@ header[data-testid="stHeader"]{
   height: 0px !important;
 }
 
-/* Cacher la toolbar Streamlit (évite l'affichage des boutons ⌨️⏩ natifs) */
+/* Toolbar visible (nécessaire pour le fonctionnement du bouton sidebar) */
 div[data-testid="stToolbar"]{
-  visibility: hidden !important;
-  height: 0 !important;
-  padding: 0 !important;
+  visibility: visible !important;
+  height: auto !important;
 }
 
-/* Conserver uniquement le bouton d'ouverture de la sidebar */
+/* Cacher les boutons natifs Streamlit (⌨️ raccourcis, ⏩ relancer)
+   sans toucher au bouton d'ouverture de la sidebar */
+div[data-testid="stToolbar"] button,
+div[data-testid="stToolbar"] a,
+div[data-testid="stAppToolbar"] button,
+div[data-testid="stAppToolbar"] a {
+  display: none !important;
+}
+
+/* Conserver le bouton d'ouverture de la sidebar */
 button[data-testid="stSidebarCollapsedControl"]{
   display: inline-flex !important;
   visibility: visible !important;
   opacity: 1 !important;
-  position: fixed !important;
-  top: 0.5rem !important;
-  left: 0.5rem !important;
-  z-index: 1000 !important;
 }
 
 /* Scrollbar dark */

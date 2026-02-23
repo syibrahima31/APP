@@ -43,6 +43,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 import base64
 import plotly.io as pio
+import streamlit.components.v1 as components
 
 from config.departments import get_department_config
 from services.email_notifications import (
@@ -1173,7 +1174,33 @@ div[data-testid="stSlider"] div[role="slider"] {
 unsafe_allow_html=True
 )
 
-
+# JS : force la sidebar ouverte au chargement si le navigateur l'avait mise en cache fermée.
+# Après le premier chargement, le bouton collapse fonctionne normalement.
+components.html(
+    """
+    <script>
+    (function() {
+      function tryOpen() {
+        try {
+          var doc = window.parent.document;
+          var sidebar = doc.querySelector('[data-testid="stSidebar"]');
+          if (!sidebar) return;
+          var st = window.getComputedStyle(sidebar);
+          var mat = new DOMMatrixReadOnly(st.transform);
+          // mat.m41 est la translation X ; si < -10px la sidebar est fermée
+          if (mat.m41 < -10) {
+            var btn = doc.querySelector('[data-testid="stSidebarCollapsedControl"]');
+            if (btn) btn.click();
+          }
+        } catch(e) {}
+      }
+      setTimeout(tryOpen, 400);
+      setTimeout(tryOpen, 900);
+    })();
+    </script>
+    """,
+    height=0,
+)
 
 
 # Paramètres + utilitaires déplacés dans `utils/data_pipeline.py`

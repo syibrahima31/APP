@@ -82,9 +82,9 @@ DEPARTMENT_PROFILES: Dict[str, Dict[str, object]] = {
         "page_title": "GI - Suivi des classes (Dashboard)",
         "header_title": "Departement Genie Informatique (GI)",
         "author_name": "El Hadji Mor Diaw",
-        "author_email": "a-renseigner@groupeisi.com",
+        "author_email": "",
         "assistant_name": "Mame Anta Thiam",
-        "assistant_email": "a-renseigner@groupeisi.com",
+        "assistant_email": "",
         "secrets": {
             "excel_url": "GI_EXCEL_URL",
             "dg_emails": "DG_EMAILS",

@@ -2377,23 +2377,38 @@ with tab_overview:
     # =========================================================
     st.write("### Top retards (Ã‰cart le plus nÃ©gatif)")
 
-    top_retards = filtered.sort_values("Ã‰cart").head(20)[
-        ["Classe", "MatiÃ¨re", "VHP", "VHR", "Ã‰cart", "Taux", "Statut_auto", "Observations"]
-    ].copy()
+    def _pick_col(df: pd.DataFrame, candidates: List[str], default_value):
+        for col in candidates:
+            if col in df.columns:
+                return df[col]
+        return pd.Series([default_value] * len(df), index=df.index)
+
+    top_retards = pd.DataFrame(
+        {
+            "Classe": _pick_col(filtered, ["Classe"], ""),
+            "Matiere": _pick_col(filtered, ["Matière", "Matiere", "MatiÃ¨re"], ""),
+            "VHP": pd.to_numeric(_pick_col(filtered, ["VHP"], 0), errors="coerce").fillna(0),
+            "VHR": pd.to_numeric(_pick_col(filtered, ["VHR"], 0), errors="coerce").fillna(0),
+            "Ecart": pd.to_numeric(_pick_col(filtered, ["Écart", "Ecart", "Ã‰cart"], 0), errors="coerce").fillna(0),
+            "Taux": pd.to_numeric(_pick_col(filtered, ["Taux"], 0), errors="coerce").fillna(0),
+            "Statut_auto": _pick_col(filtered, ["Statut_auto"], ""),
+            "Observations": _pick_col(filtered, ["Observations", "Observation"], ""),
+        }
+    ).sort_values("Ecart").head(20)
 
     # âœ… Ajout colonnes lisibles
     top_retards["Taux (%)"] = (top_retards["Taux"] * 100).round(1)
     top_retards["Statut"] = top_retards["Statut_auto"].apply(statut_badge_text)
 
     st.dataframe(
-        top_retards[["Classe", "MatiÃ¨re", "VHP", "VHR", "Ã‰cart", "Taux (%)", "Statut", "Observations"]],
+        top_retards[["Classe", "Matiere", "VHP", "VHR", "Ecart", "Taux (%)", "Statut", "Observations"]],
         use_container_width=True,
         height=420,
         column_config={
             "Taux (%)": st.column_config.ProgressColumn(
                 "Taux (%)", min_value=0.0, max_value=100.0, format="%.1f%%"
             ),
-            "Ã‰cart": st.column_config.NumberColumn("Ã‰cart (h)", format="%.0f"),
+            "Ecart": st.column_config.NumberColumn("Ecart (h)", format="%.0f"),
             "VHP": st.column_config.NumberColumn("VHP", format="%.0f"),
             "VHR": st.column_config.NumberColumn("VHR", format="%.0f"),
             "Statut": st.column_config.TextColumn("Statut"),

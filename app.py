@@ -1829,10 +1829,12 @@ with st.sidebar:
     # =========================================================
     sidebar_card("PÃ©riode couverte")
 
+    default_mois_range = (MOIS_COLS[0], MOIS_COLS[-1]) if len(MOIS_COLS) >= 2 else (MOIS_COLS[0], MOIS_COLS[0])
     mois_min, mois_max = st.select_slider(
-    "Mois (de â†’ Ã )",
-    options=MOIS_COLS,
-    value=("Oct", "AoÃ»t"),)
+        "Mois (de -> à)",
+        options=MOIS_COLS,
+        value=default_mois_range,
+    )
 
     mois_couverts = MOIS_COLS[MOIS_COLS.index(mois_min): MOIS_COLS.index(mois_max) + 1]
 

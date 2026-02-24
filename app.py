@@ -73,7 +73,7 @@ from utils.data_pipeline import (
     normalize_semestre_value,
 )
 
-# Choix du profil via APP_DEPT_PROFILE: IAID (défaut), KM, DRS
+# Choix du profil via APP_DEPT_PROFILE: IAID (défaut), KM, DRS, GI
 CFG = get_department_config(os.getenv("APP_DEPT_PROFILE", "IAID"))
 
 

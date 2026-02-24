@@ -2159,6 +2159,28 @@ st.caption(f"Source active : **{source_label}**")
 
 df, quality = load_excel_all_sheets(file_bytes)
 
+
+def _ensure_column_aliases(d: pd.DataFrame) -> pd.DataFrame:
+    """Rend les noms de colonnes robustes aux variantes d'encodage/accents."""
+    alias_groups = [
+        ["Matière", "Matiere", "MatiÃ¨re"],
+        ["Écart", "Ecart", "Ã‰cart"],
+        ["Début prévu", "Debut prévu", "Debut prevu", "DÃ©but prÃ©vu"],
+        ["Fin prévue", "Fin prevue", "Fin prÃ©vue"],
+    ]
+    out = d.copy()
+    for group in alias_groups:
+        source = next((name for name in group if name in out.columns), None)
+        if source is None:
+            continue
+        for name in group:
+            if name not in out.columns:
+                out[name] = out[source]
+    return out
+
+
+df = _ensure_column_aliases(df)
+
 # Auto-refresh uniquement en mode URL
 # if import_mode == "URL (auto)" and auto_refresh:
 #     time.sleep(refresh_sec)
@@ -2175,8 +2197,11 @@ if df.empty:
 df_period = df.copy()
 df_period["VHR"] = df_period[mois_couverts].sum(axis=1)
 df_period["Ã‰cart"] = df_period["VHR"] - df_period["VHP"]
+df_period["Ecart"] = df_period["Ã‰cart"]
+df_period["Écart"] = df_period["Ã‰cart"]
 df_period["Taux"] = np.where(df_period["VHP"] == 0, 0, df_period["VHR"] / df_period["VHP"])
 df_period["Statut_auto"] = np.where(df_period["VHR"] <= 0, "Non dÃ©marrÃ©", np.where(df_period["VHR"] < df_period["VHP"], "En cours", "TerminÃ©"))
+df_period = _ensure_column_aliases(df_period)
 
 # =========================
 # FIX RESPONSABLE (IMPORTANT)

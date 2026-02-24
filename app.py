@@ -1,4 +1,4 @@
-﻿
+
 """
 Dashboard Ultra Évolué - Suivi mensuel des classes (Excel multi-feuilles)
 Auteur: ChatGPT

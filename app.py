@@ -1,6 +1,6 @@
-
+﻿
 """
-Dashboard Ultra Évolué - Suivi mensuel des classes (Excel multi-feuilles)
+Dashboard Ultra Ã‰voluÃ© - Suivi mensuel des classes (Excel multi-feuilles)
 Auteur: ChatGPT
 Usage:
     pip install -r requirements.txt
@@ -73,7 +73,7 @@ from utils.data_pipeline import (
     normalize_semestre_value,
 )
 
-# Choix du profil via APP_DEPT_PROFILE: IAID (défaut), KM, DRS
+# Choix du profil via APP_DEPT_PROFILE: IAID (dÃ©faut), KM, DRS
 CFG = get_department_config(os.getenv("APP_DEPT_PROFILE", "IAID"))
 
 
@@ -114,7 +114,7 @@ def safe_secret(key: str, default=""):
 
 
 def _get_smtp_config() -> dict:
-    """Lit et valide la configuration SMTP depuis st.secrets. Lève RuntimeError si incomplète."""
+    """Lit et valide la configuration SMTP depuis st.secrets. LÃ¨ve RuntimeError si incomplÃ¨te."""
     smtp_host = str(safe_secret("SMTP_HOST", "")).strip()
     smtp_port_raw = str(safe_secret("SMTP_PORT", "")).strip()
     smtp_user = str(safe_secret("SMTP_USER", "")).strip()
@@ -140,16 +140,16 @@ def _get_smtp_config() -> dict:
 
 
 # ==============================
-# ✅ RESUME IA (OPENAI) — OBSERVATIONS
+# âœ… RESUME IA (OPENAI) â€” OBSERVATIONS
 # ==============================
 from openai import OpenAI
 
 def _build_obs_payload(df_obs: pd.DataFrame, max_lines: int = 300) -> str:
     """
     Transforme les observations en texte court, lisible par un LLM.
-    On limite le nombre de lignes pour éviter les prompts énormes.
+    On limite le nombre de lignes pour Ã©viter les prompts Ã©normes.
     """
-    cols_needed = ["Classe", "Matière", "Écart", "Statut_auto", "Observations"]
+    cols_needed = ["Classe", "MatiÃ¨re", "Ã‰cart", "Statut_auto", "Observations"]
     for c in cols_needed:
         if c not in df_obs.columns:
             df_obs[c] = ""
@@ -164,9 +164,9 @@ def _build_obs_payload(df_obs: pd.DataFrame, max_lines: int = 300) -> str:
     d = d[d["Observations"].str.len() > 0].copy()
 
     # Prioriser : retards les plus critiques d'abord
-    if "Écart" in d.columns:
-        d["Écart"] = pd.to_numeric(d["Écart"], errors="coerce").fillna(0)
-        d = d.sort_values("Écart", ascending=True)
+    if "Ã‰cart" in d.columns:
+        d["Ã‰cart"] = pd.to_numeric(d["Ã‰cart"], errors="coerce").fillna(0)
+        d = d.sort_values("Ã‰cart", ascending=True)
 
     d = d.head(max_lines)
 
@@ -174,9 +174,9 @@ def _build_obs_payload(df_obs: pd.DataFrame, max_lines: int = 300) -> str:
     for _, r in d.iterrows():
         lines.append(
             f"- Classe: {str(r.get('Classe','')).strip()} | "
-            f"Matière: {str(r.get('Matière','')).strip()} | "
+            f"MatiÃ¨re: {str(r.get('MatiÃ¨re','')).strip()} | "
             f"Statut: {str(r.get('Statut_auto','')).strip()} | "
-            f"Écart(h): {r.get('Écart', 0)} | "
+            f"Ã‰cart(h): {r.get('Ã‰cart', 0)} | "
             f"Obs: {str(r.get('Observations','')).strip()}"
         )
     return "\n".join(lines)
@@ -191,7 +191,7 @@ def summarize_observations_with_openai(
     max_lines: int = 300
 ) -> str:
     """
-    Retourne un résumé DG-ready des observations.
+    Retourne un rÃ©sumÃ© DG-ready des observations.
     """
     api_key = str(safe_secret("OPENAI_API_KEY", "")).strip()
     if not api_key:
@@ -206,31 +206,31 @@ def summarize_observations_with_openai(
 
     payload = _build_obs_payload(df_obs, max_lines=max_lines)
     if not payload.strip():
-        return "Aucune observation renseignée sur la période sélectionnée."
+        return "Aucune observation renseignÃ©e sur la pÃ©riode sÃ©lectionnÃ©e."
 
     system = (
-        "Tu es un assistant de pilotage académique. "
-        "Tu dois produire un résumé professionnel, clair, actionnable, style Direction Générale. "
-        "Ne divulgue aucune donnée sensible (emails, infos perso)."
+        "Tu es un assistant de pilotage acadÃ©mique. "
+        "Tu dois produire un rÃ©sumÃ© professionnel, clair, actionnable, style Direction GÃ©nÃ©rale. "
+        "Ne divulgue aucune donnÃ©e sensible (emails, infos perso)."
     )
 
     user = f"""
 Contexte:
-- Département: {cfg.get('department_long','')}
-- Période: {mois_min} → {mois_max}
+- DÃ©partement: {cfg.get('department_long','')}
+- PÃ©riode: {mois_min} â†’ {mois_max}
 
-Données (observations consolidées):
+DonnÃ©es (observations consolidÃ©es):
 {payload}
 
-Tâche:
-1) Résumé exécutif (5–8 lignes)
-2) Points critiques récurrents (5–10 puces)
-3) Actions recommandées (3–7 actions)
-4) Synthèse par classe (1–2 lignes par classe max)
+TÃ¢che:
+1) RÃ©sumÃ© exÃ©cutif (5â€“8 lignes)
+2) Points critiques rÃ©currents (5â€“10 puces)
+3) Actions recommandÃ©es (3â€“7 actions)
+4) SynthÃ¨se par classe (1â€“2 lignes par classe max)
 Format: Markdown.
 """.strip()
 
-    # API Responses (recommandée)
+    # API Responses (recommandÃ©e)
     resp = client.responses.create(
         model=model,
         input=[
@@ -248,8 +248,8 @@ st.markdown(
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
 
 /* =========================================================
-   IAID — THÈME DARK EXÉCUTIF (INSPIRÉ DASHBOARD FUTURISTE)
-   Navy sombre • Glow effects • Design moderne
+   IAID â€” THÃˆME DARK EXÃ‰CUTIF (INSPIRÃ‰ DASHBOARD FUTURISTE)
+   Navy sombre â€¢ Glow effects â€¢ Design moderne
    ========================================================= */
 
 /* Force dark mode partout */
@@ -403,7 +403,7 @@ span[data-baseweb="tag"]{
 
 
 /* -----------------------------
-   HEADER DG — FUTURISTE
+   HEADER DG â€” FUTURISTE
 ------------------------------*/
 .iaid-header{
   background: linear-gradient(135deg, #0A1E44 0%, #0F2860 40%, #1A3A80 100%);
@@ -450,7 +450,7 @@ span[data-baseweb="tag"]{
 }
 
 /* -----------------------------
-   KPI CARDS — FUTURISTES
+   KPI CARDS â€” FUTURISTES
 ------------------------------*/
 .kpi-grid{
   display: grid;
@@ -472,7 +472,7 @@ span[data-baseweb="tag"]{
   transform: translateY(-3px);
   box-shadow: 0 16px 48px rgba(0,0,0,0.55);
 }
-/* Barre colorée en haut */
+/* Barre colorÃ©e en haut */
 .kpi:before{
   content:"";
   position:absolute;
@@ -521,7 +521,7 @@ span[data-baseweb="tag"]{
 .kpi-bad .kpi-value{ color: var(--bad) !important; }
 
 /* -----------------------------
-   TABS — DARK
+   TABS â€” DARK
 ------------------------------*/
 button[data-baseweb="tab"]{
   background: var(--card) !important;
@@ -544,7 +544,7 @@ button[data-baseweb="tab"][aria-selected="true"]{
 }
 
 /* -----------------------------
-   DATAFRAMES / TABLES — DARK
+   DATAFRAMES / TABLES â€” DARK
 ------------------------------*/
 div[data-testid="stDataFrame"]{
   background: var(--card) !important;
@@ -563,7 +563,7 @@ div[data-testid="stDataFrame"]{
 }
 
 /* -----------------------------
-   ALERTES STREAMLIT — DARK
+   ALERTES STREAMLIT â€” DARK
 ------------------------------*/
 div[data-testid="stAlert"]{
   border-radius: 14px !important;
@@ -576,7 +576,7 @@ div[data-testid="stAlert"] *{
 }
 
 /* =========================================================
-   BOUTONS — DARK GLOW
+   BOUTONS â€” DARK GLOW
 ========================================================= */
 
 .stButton button,
@@ -613,17 +613,17 @@ button[kind="secondary"] *{
 }
 
 /* =========================================================
-   RESPONSIVE — TOUTES TAILLES D'ÉCRAN
+   RESPONSIVE â€” TOUTES TAILLES D'Ã‰CRAN
    Breakpoints : 1400 / 1200 / 900 / 700 / 520 / 380 px
 ========================================================= */
 
-/* ---- ≤ 1400px : grand écran réduit ---- */
+/* ---- â‰¤ 1400px : grand Ã©cran rÃ©duit ---- */
 @media (max-width: 1400px){
   .kpi-value{ font-size: 24px; }
   .iaid-htitle{ font-size: 18px; }
 }
 
-/* ---- ≤ 1200px : tablette paysage / laptop compact ---- */
+/* ---- â‰¤ 1200px : tablette paysage / laptop compact ---- */
 @media (max-width: 1200px){
   .kpi-grid{
     grid-template-columns: repeat(3, minmax(0,1fr));
@@ -642,7 +642,7 @@ button[kind="secondary"] *{
   }
 }
 
-/* ---- ≤ 900px : tablette portrait ---- */
+/* ---- â‰¤ 900px : tablette portrait ---- */
 @media (max-width: 900px){
   .kpi-grid{
     grid-template-columns: repeat(3, minmax(0,1fr));
@@ -686,7 +686,7 @@ button[kind="secondary"] *{
   }
 }
 
-/* ---- ≤ 700px : grand smartphone paysage / petite tablette ---- */
+/* ---- â‰¤ 700px : grand smartphone paysage / petite tablette ---- */
 @media (max-width: 700px){
   html, body, .stApp{ font-size: 15px !important; }
 
@@ -755,7 +755,7 @@ button[kind="secondary"] *{
   }
 }
 
-/* ---- ≤ 520px : smartphone portrait ---- */
+/* ---- â‰¤ 520px : smartphone portrait ---- */
 @media (max-width: 520px){
   html, body, .stApp{ font-size: 14px !important; }
 
@@ -822,7 +822,7 @@ button[kind="secondary"] *{
   h3{ font-size: 14px !important; }
 }
 
-/* ---- ≤ 380px : très petit smartphone ---- */
+/* ---- â‰¤ 380px : trÃ¨s petit smartphone ---- */
 @media (max-width: 380px){
   .kpi-grid{
     grid-template-columns: 1fr;
@@ -848,7 +848,7 @@ button[kind="secondary"] *{
 }
 
 /* -----------------------------
-   FOOTER SIGNATURE (FIXE) — DARK
+   FOOTER SIGNATURE (FIXE) â€” DARK
 ------------------------------*/
 .footer-signature{
   position: fixed;
@@ -870,7 +870,7 @@ button[kind="secondary"] *{
   font-weight: 900;
 }
 /* =========================
-   BADGES STATUT — DARK GLOW
+   BADGES STATUT â€” DARK GLOW
 ========================= */
 .badge{
   display:inline-block;
@@ -901,7 +901,7 @@ button[kind="secondary"] *{
 }
 
 /* =========================================================
-   PATCH BOUTONS — renforcement multi-navigateurs
+   PATCH BOUTONS â€” renforcement multi-navigateurs
 ========================================================= */
 
 .stButton > button,
@@ -933,7 +933,7 @@ button[kind="secondary"] *{
 }
 
 /* -----------------------------
-   HEADER DG — LAYOUT (FIX)
+   HEADER DG â€” LAYOUT (FIX)
 ------------------------------*/
 .iaid-hrow{
   display:flex;
@@ -988,16 +988,16 @@ button[kind="secondary"] *{
 }
 
 /* =========================================================
-   DESIGN v2 — Font • Animations • Glassmorphisme • Tables
+   DESIGN v2 â€” Font â€¢ Animations â€¢ Glassmorphisme â€¢ Tables
    ========================================================= */
 
-/* 1. FONT PREMIUM — Space Grotesk */
+/* 1. FONT PREMIUM â€” Space Grotesk */
 html, body, .stApp, button, input, select, textarea,
 div[data-testid], p, label, th, td, li {
   font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif !important;
 }
 
-/* Streamlit utilise des ligatures Material pour certaines icônes (ex: sidebar toggle). */
+/* Streamlit utilise des ligatures Material pour certaines icÃ´nes (ex: sidebar toggle). */
 [data-testid="stSidebarCollapsedControl"] span,
 [class*="material-symbol"] ,
 [class*="material-icons"] {
@@ -1031,7 +1031,7 @@ section[data-testid="stSidebar"] { position: relative; z-index: 2; }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* 4. SHIMMER ANIMÉ SUR LES BARRES KPI */
+/* 4. SHIMMER ANIMÃ‰ SUR LES BARRES KPI */
 .kpi::before {
   background-size: 300% auto !important;
   animation: shimmer-bar 4s linear infinite !important;
@@ -1063,7 +1063,7 @@ div[role="tabpanel"] {
   animation: fade-up 0.22s ease;
 }
 
-/* 7. TABLES HTML (.iaid-table) — design complet */
+/* 7. TABLES HTML (.iaid-table) â€” design complet */
 .iaid-table {
   width: 100%;
   border-collapse: collapse;
@@ -1097,7 +1097,7 @@ div[role="tabpanel"] {
   vertical-align: middle;
 }
 
-/* 8. ST.METRIC — premium */
+/* 8. ST.METRIC â€” premium */
 div[data-testid="metric-container"] {
   background: linear-gradient(135deg, var(--card) 0%, var(--card2) 100%) !important;
   border: 1px solid var(--line) !important;
@@ -1122,7 +1122,7 @@ div[data-testid="stMetricDelta"] {
   display: inline-block !important;
 }
 
-/* 9. BARRE DE PROGRESSION DÉGRADÉE */
+/* 9. BARRE DE PROGRESSION DÃ‰GRADÃ‰E */
 div[data-testid="stProgress"] > div {
   background: rgba(255,255,255,0.07) !important;
   border-radius: 999px !important;
@@ -1145,12 +1145,12 @@ div[data-testid="stExpander"] summary {
   padding: 12px 16px !important;
 }
 
-/* 11. BADGE WARN — pulse discret */
+/* 11. BADGE WARN â€” pulse discret */
 .badge-warn {
   animation: pulse-glow 2.5s ease-in-out infinite;
 }
 
-/* 12. SIDEBAR — ligne décorative dégradée */
+/* 12. SIDEBAR â€” ligne dÃ©corative dÃ©gradÃ©e */
 section[data-testid="stSidebar"]::after {
   content: "";
   position: absolute;
@@ -1160,7 +1160,7 @@ section[data-testid="stSidebar"]::after {
   pointer-events: none;
 }
 
-/* 13. CHECKBOX & RADIO — dark */
+/* 13. CHECKBOX & RADIO â€” dark */
 div[data-baseweb="checkbox"] span,
 div[data-baseweb="radio"] span {
   border-color: rgba(90,162,255,0.40) !important;
@@ -1182,8 +1182,8 @@ div[data-testid="stSlider"] div[role="slider"] {
 unsafe_allow_html=True
 )
 
-# JS : force la sidebar ouverte au chargement si le navigateur l'avait mise en cache fermée.
-# Après le premier chargement, le bouton collapse fonctionne normalement.
+# JS : force la sidebar ouverte au chargement si le navigateur l'avait mise en cache fermÃ©e.
+# AprÃ¨s le premier chargement, le bouton collapse fonctionne normalement.
 components.html(
     """
     <script>
@@ -1195,7 +1195,7 @@ components.html(
           if (!sidebar) return;
           var st = window.getComputedStyle(sidebar);
           var mat = new DOMMatrixReadOnly(st.transform);
-          // mat.m41 est la translation X ; si < -10px la sidebar est fermée
+          // mat.m41 est la translation X ; si < -10px la sidebar est fermÃ©e
           if (mat.m41 < -10) {
             var btn = doc.querySelector('[data-testid="stSidebarCollapsedControl"]');
             if (btn) btn.click();
@@ -1211,7 +1211,7 @@ components.html(
 )
 
 
-# Paramètres + utilitaires déplacés dans `utils/data_pipeline.py`
+# ParamÃ¨tres + utilitaires dÃ©placÃ©s dans `utils/data_pipeline.py`
 
 # -----------------------------
 # PDF (ReportLab)
@@ -1244,9 +1244,9 @@ def build_pdf_report(
     # -----------------------------
     now_dt = dt.datetime.now()
     date_gen = now_dt.strftime("%d/%m/%Y %H:%M")
-    periode_str = " – ".join(mois_couverts) if mois_couverts else "—"
+    periode_str = " â€“ ".join(mois_couverts) if mois_couverts else "â€”"
 
-    # Tableau en-tête (logo + infos)
+    # Tableau en-tÃªte (logo + infos)
     logo_cell = ""
     if logo_bytes:
         try:
@@ -1273,8 +1273,8 @@ def build_pdf_report(
             Paragraph(
                 f"""
                 <b>Date :</b> {date_gen}<br/>
-                <b>Période :</b> {periode_str}<br/>
-                <b>Référence :</b> {department.split('(')[-1].replace(')','').strip() or 'DEPT'}-SUIVI-{now_dt.strftime("%Y%m")}
+                <b>PÃ©riode :</b> {periode_str}<br/>
+                <b>RÃ©fÃ©rence :</b> {department.split('(')[-1].replace(')','').strip() or 'DEPT'}-SUIVI-{now_dt.strftime("%Y%m")}
                 """,
                 P
             )
@@ -1341,13 +1341,13 @@ def build_pdf_report(
     # KPIs globaux
     total = len(df)
     taux_moy = float(df["Taux"].mean() * 100) if total else 0.0
-    nb_term = int((df["Statut_auto"] == "Terminé").sum())
+    nb_term = int((df["Statut_auto"] == "TerminÃ©").sum())
     nb_enc  = int((df["Statut_auto"] == "En cours").sum())
-    nb_nd   = int((df["Statut_auto"] == "Non démarré").sum())
+    nb_nd   = int((df["Statut_auto"] == "Non dÃ©marrÃ©").sum())
 
     kpi_table = Table(
         [
-            ["Matières", "Taux moyen", "Terminées", "En cours", "Non démarrées"],
+            ["MatiÃ¨res", "Taux moyen", "TerminÃ©es", "En cours", "Non dÃ©marrÃ©es"],
             [str(total), f"{taux_moy:.1f}%", str(nb_term), str(nb_enc), str(nb_nd)],
         ],
         colWidths=[3.0*cm, 3.0*cm, 3.0*cm, 3.0*cm, 3.4*cm],
@@ -1363,17 +1363,17 @@ def build_pdf_report(
     story.append(kpi_table)
     story.append(Spacer(1, 12))
 
-    # Alertes synthèse
-    story.append(Paragraph("Synthèse – alertes clés", H2))
-    crit = df[(df["Écart"] <= thresholds["ecart_critique"]) | (df["Statut_auto"] == "Non démarré")].copy()
+    # Alertes synthÃ¨se
+    story.append(Paragraph("SynthÃ¨se â€“ alertes clÃ©s", H2))
+    crit = df[(df["Ã‰cart"] <= thresholds["ecart_critique"]) | (df["Statut_auto"] == "Non dÃ©marrÃ©")].copy()
     if crit.empty:
-        story.append(Paragraph("Aucune alerte critique détectée selon les seuils actuels.", P))
+        story.append(Paragraph("Aucune alerte critique dÃ©tectÃ©e selon les seuils actuels.", P))
     else:
         # Top 12 alertes
-        crit = crit.sort_values(["Classe", "Écart"])
-        rows = [["Classe", "Matière", "VHP", "VHR", "Écart", "Statut"]]
+        crit = crit.sort_values(["Classe", "Ã‰cart"])
+        rows = [["Classe", "MatiÃ¨re", "VHP", "VHR", "Ã‰cart", "Statut"]]
         for _, r in crit.head(12).iterrows():
-            rows.append([str(r["Classe"]), str(r["Matière"])[:45], f"{r['VHP']:.0f}", f"{r['VHR']:.0f}", f"{r['Écart']:.0f}", str(r["Statut_auto"])])
+            rows.append([str(r["Classe"]), str(r["MatiÃ¨re"])[:45], f"{r['VHP']:.0f}", f"{r['VHR']:.0f}", f"{r['Ã‰cart']:.0f}", str(r["Statut_auto"])])
         t = Table(rows, colWidths=[2.4*cm, 8.2*cm, 1.3*cm, 1.3*cm, 1.3*cm, 2.6*cm])
         t.setStyle(TableStyle([
             ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#F0F3F8")),
@@ -1383,29 +1383,29 @@ def build_pdf_report(
             ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
         ]))
         story.append(t)
-        story.append(Paragraph("NB : liste limitée aux 12 premières alertes (tri par écart).", Small))
+        story.append(Paragraph("NB : liste limitÃ©e aux 12 premiÃ¨res alertes (tri par Ã©cart).", Small))
         
     story.append(PageBreak())
 
-    # Détail par classe
-    story.append(Paragraph("Détail par classe", H1))
+    # DÃ©tail par classe
+    story.append(Paragraph("DÃ©tail par classe", H1))
     for classe, g in df.groupby("Classe"):
         story.append(Paragraph(f"Classe : {classe}", H2))
 
         # KPIs classe
         total_c = len(g)
         taux_c = float(g["Taux"].mean() * 100) if total_c else 0.0
-        nd_c = int((g["Statut_auto"] == "Non démarré").sum())
+        nd_c = int((g["Statut_auto"] == "Non dÃ©marrÃ©").sum())
         enc_c = int((g["Statut_auto"] == "En cours").sum())
-        term_c = int((g["Statut_auto"] == "Terminé").sum())
-        story.append(Paragraph(f"Matières: <b>{total_c}</b> — Taux moyen: <b>{taux_c:.1f}%</b> — Terminé: <b>{term_c}</b> — En cours: <b>{enc_c}</b> — Non démarré: <b>{nd_c}</b>", P))
+        term_c = int((g["Statut_auto"] == "TerminÃ©").sum())
+        story.append(Paragraph(f"MatiÃ¨res: <b>{total_c}</b> â€” Taux moyen: <b>{taux_c:.1f}%</b> â€” TerminÃ©: <b>{term_c}</b> â€” En cours: <b>{enc_c}</b> â€” Non dÃ©marrÃ©: <b>{nd_c}</b>", P))
         story.append(Spacer(1, 6))
 
         # Table compacte (top retards)
-        gg = g.sort_values("Écart").copy()
-        rows = [["Matière", "VHP", "VHR", "Écart", "Taux", "Statut"]]
+        gg = g.sort_values("Ã‰cart").copy()
+        rows = [["MatiÃ¨re", "VHP", "VHR", "Ã‰cart", "Taux", "Statut"]]
         for _, r in gg.head(20).iterrows():
-            rows.append([str(r["Matière"])[:45], f"{r['VHP']:.0f}", f"{r['VHR']:.0f}", f"{r['Écart']:.0f}", f"{(r['Taux']*100):.0f}%", str(r["Statut_auto"])])
+            rows.append([str(r["MatiÃ¨re"])[:45], f"{r['VHP']:.0f}", f"{r['VHR']:.0f}", f"{r['Ã‰cart']:.0f}", f"{(r['Taux']*100):.0f}%", str(r["Statut_auto"])])
         t = Table(rows, colWidths=[8.6*cm, 1.3*cm, 1.3*cm, 1.3*cm, 1.3*cm, 2.2*cm])
         t.setStyle(TableStyle([
             ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#0B3D91")),
@@ -1422,8 +1422,8 @@ def build_pdf_report(
         canvas.saveState()
         canvas.setFont("Helvetica", 8)
         canvas.setFillColor(colors.HexColor("#475569"))
-        canvas.drawString(1.6*cm, 1.0*cm, f"{department} — Rapport de suivi des enseignements")
-        canvas.drawRightString(19.4*cm, 1.0*cm, f"Généré le {dt.datetime.now().strftime('%d/%m/%Y %H:%M')}  |  Page {doc_.page}")
+        canvas.drawString(1.6*cm, 1.0*cm, f"{department} â€” Rapport de suivi des enseignements")
+        canvas.drawRightString(19.4*cm, 1.0*cm, f"GÃ©nÃ©rÃ© le {dt.datetime.now().strftime('%d/%m/%Y %H:%M')}  |  Page {doc_.page}")
         canvas.restoreState()
 
     doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
@@ -1447,7 +1447,7 @@ def build_pdf_observations_report(
     Small = ParagraphStyle("Small", parent=styles["BodyText"], fontSize=8, leading=10)
 
     # =========================================================
-    # ✅ WRAP PDF (Observations) — Anti chevauchement + texte long
+    # âœ… WRAP PDF (Observations) â€” Anti chevauchement + texte long
     # =========================================================
     from reportlab.lib.enums import TA_LEFT
 
@@ -1488,7 +1488,7 @@ def build_pdf_observations_report(
         s = _esc(x).strip()
         if allow_br:
             s = s.replace("\n", "<br/>")
-        return Paragraph(s if s else "—", CELL)
+        return Paragraph(s if s else "â€”", CELL)
 
     out = io.BytesIO()
     doc = SimpleDocTemplate(
@@ -1511,7 +1511,7 @@ def build_pdf_observations_report(
         d["Observations"].astype(str)
         .replace({"nan": "", "None": ""})
         .fillna("")
-        .str.replace("\r", "", regex=False)  # ✅ garder \n (retours ligne)
+        .str.replace("\r", "", regex=False)  # âœ… garder \n (retours ligne)
         .str.strip()
     )
 
@@ -1519,10 +1519,10 @@ def build_pdf_observations_report(
 
     now_dt = dt.datetime.now()
     date_gen = now_dt.strftime("%d/%m/%Y %H:%M")
-    periode_str = " – ".join(mois_couverts) if mois_couverts else "—"
+    periode_str = " â€“ ".join(mois_couverts) if mois_couverts else "â€”"
 
     # -----------------------------
-    # Couverture officielle (même style que ton PDF principal)
+    # Couverture officielle (mÃªme style que ton PDF principal)
     # -----------------------------
     logo_cell = ""
     if logo_bytes:
@@ -1541,7 +1541,7 @@ def build_pdf_observations_report(
             <b>{institution}</b><br/>
             {department}<br/>
             <font size="9" color="#475569">
-            Rapport officiel — Suivi des enseignements (Observations)<br/>
+            Rapport officiel â€” Suivi des enseignements (Observations)<br/>
             </font>
             """,
             P
@@ -1549,8 +1549,8 @@ def build_pdf_observations_report(
         Paragraph(
             f"""
             <b>Date :</b> {date_gen}<br/>
-            <b>Période :</b> {periode_str}<br/>
-            <b>Référence :</b> {department.split('(')[-1].replace(')','').strip() or 'DEPT'}-OBS-{now_dt.strftime("%Y%m")}
+            <b>PÃ©riode :</b> {periode_str}<br/>
+            <b>RÃ©fÃ©rence :</b> {department.split('(')[-1].replace(')','').strip() or 'DEPT'}-OBS-{now_dt.strftime("%Y%m")}
             """,
             P
         )
@@ -1611,27 +1611,27 @@ def build_pdf_observations_report(
     # Si aucune observation
     # -----------------------------
     if d.empty:
-        story.append(Paragraph("Aucune observation renseignée sur la période sélectionnée.", P))
-        story.append(Paragraph("Le suivi des enseignements par observations ne peut pas être établi sans commentaires.", Small))
+        story.append(Paragraph("Aucune observation renseignÃ©e sur la pÃ©riode sÃ©lectionnÃ©e.", P))
+        story.append(Paragraph("Le suivi des enseignements par observations ne peut pas Ãªtre Ã©tabli sans commentaires.", Small))
 
         def _footer(canvas, doc_):
             canvas.saveState()
             canvas.setFont("Helvetica", 8)
             canvas.setFillColor(colors.HexColor("#475569"))
-            canvas.drawString(1.6*cm, 1.0*cm, f"{department} — Suivi des enseignements (Observations)")
-            canvas.drawRightString(19.4*cm, 1.0*cm, f"Généré le {dt.datetime.now().strftime('%d/%m/%Y %H:%M')}  |  Page {doc_.page}")
+            canvas.drawString(1.6*cm, 1.0*cm, f"{department} â€” Suivi des enseignements (Observations)")
+            canvas.drawRightString(19.4*cm, 1.0*cm, f"GÃ©nÃ©rÃ© le {dt.datetime.now().strftime('%d/%m/%Y %H:%M')}  |  Page {doc_.page}")
             canvas.restoreState()
 
         doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
         return out.getvalue()
 
     # -----------------------------
-    # Synthèse (KPIs)
+    # SynthÃ¨se (KPIs)
     # -----------------------------
     if "Classe" not in d.columns:
-        d["Classe"] = "—"
+        d["Classe"] = "â€”"
     if "Responsable" not in d.columns:
-        d["Responsable"] = "—"
+        d["Responsable"] = "â€”"
 
     total_obs = len(d)
     nb_classes = int(d["Classe"].nunique())
@@ -1639,7 +1639,7 @@ def build_pdf_observations_report(
 
     kpi_table = Table(
         [
-            ["Modules avec observation", "Classes concernées", "Responsables concernés"],
+            ["Modules avec observation", "Classes concernÃ©es", "Responsables concernÃ©s"],
             [str(total_obs), str(nb_classes), str(nb_resp)],
         ],
         colWidths=[5.2*cm, 5.2*cm, 5.5*cm],
@@ -1654,15 +1654,15 @@ def build_pdf_observations_report(
     ]))
     story.append(kpi_table)
     story.append(Spacer(1, 10))
-    story.append(Paragraph("Détail — Observations par classe", H1))
+    story.append(Paragraph("DÃ©tail â€” Observations par classe", H1))
 
     # -----------------------------
-    # Détail par classe
+    # DÃ©tail par classe
     # -----------------------------
     sort_cols = ["Classe"]
-    if "Écart" in d.columns:
-        sort_cols += ["Écart"]
-    d = d.sort_values(sort_cols, ascending=[True] + ([True] if "Écart" in d.columns else []))
+    if "Ã‰cart" in d.columns:
+        sort_cols += ["Ã‰cart"]
+    d = d.sort_values(sort_cols, ascending=[True] + ([True] if "Ã‰cart" in d.columns else []))
 
     for classe, g in d.groupby("Classe"):
         story.append(Paragraph(f"Classe : {classe}", H2))
@@ -1671,11 +1671,11 @@ def build_pdf_observations_report(
         if max_rows_per_class and max_rows_per_class > 0:
             gg = gg.head(max_rows_per_class)
 
-        # ✅ Table WRAP : Paragraph dans toutes les cellules texte
+        # âœ… Table WRAP : Paragraph dans toutes les cellules texte
         rows = [[
             Paragraph("<b>Sem</b>", HEAD),
             Paragraph("<b>Type</b>", HEAD),
-            Paragraph("<b>Matière</b>", HEAD),
+            Paragraph("<b>MatiÃ¨re</b>", HEAD),
             Paragraph("<b>Responsable</b>", HEAD),
             Paragraph("<b>Observation</b>", HEAD),
         ]]
@@ -1683,9 +1683,9 @@ def build_pdf_observations_report(
         for _, r in gg.iterrows():
             sem  = r.get("Semestre", "")
             typ  = r.get("Type", "")
-            mat  = r.get("Matière", "")
+            mat  = r.get("MatiÃ¨re", "")
             resp = r.get("Responsable", "")
-            obs  = r.get("Observations", "")  # ✅ PAS TRONQUÉ
+            obs  = r.get("Observations", "")  # âœ… PAS TRONQUÃ‰
 
             rows.append([
                 Pcell(sem,  allow_br=False),
@@ -1699,7 +1699,7 @@ def build_pdf_observations_report(
             rows,
             colWidths=[1.0*cm, 1.5*cm, 4.0*cm, 3.1*cm, 6.3*cm],  # total ~ 15.9cm
             repeatRows=1,
-            splitByRow=1,  # ✅ découpage multi-pages
+            splitByRow=1,  # âœ… dÃ©coupage multi-pages
         )
 
         t.setStyle(TableStyle([
@@ -1724,8 +1724,8 @@ def build_pdf_observations_report(
         canvas.saveState()
         canvas.setFont("Helvetica", 8)
         canvas.setFillColor(colors.HexColor("#475569"))
-        canvas.drawString(1.6*cm, 1.0*cm, f"{department} — Suivi des enseignements (Observations)")
-        canvas.drawRightString(19.4*cm, 1.0*cm, f"Généré le {dt.datetime.now().strftime('%d/%m/%Y %H:%M')}  |  Page {doc_.page}")
+        canvas.drawString(1.6*cm, 1.0*cm, f"{department} â€” Suivi des enseignements (Observations)")
+        canvas.drawRightString(19.4*cm, 1.0*cm, f"GÃ©nÃ©rÃ© le {dt.datetime.now().strftime('%d/%m/%Y %H:%M')}  |  Page {doc_.page}")
         canvas.restoreState()
 
     doc.build(story, onFirstPage=_footer, onLaterPages=_footer)
@@ -1756,14 +1756,14 @@ with st.sidebar:
     # =========================================================
     # 1) IMPORT & PARAMETRES
     # =========================================================
-    sidebar_card("Import & Paramètres")
+    sidebar_card("Import & ParamÃ¨tres")
 
     import_mode = st.radio("Mode d'import", ["URL (auto)", "Upload (manuel)"], index=0)
 
     file_bytes = None
     source_label = None
 
-    st.caption("Chaque feuille = une classe. Colonnes attendues : Matière, VHP, Oct..Août (au minimum).")
+    st.caption("Chaque feuille = une classe. Colonnes attendues : MatiÃ¨re, VHP, Oct..AoÃ»t (au minimum).")
     sidebar_card_end()
 
     # =========================================================
@@ -1771,8 +1771,8 @@ with st.sidebar:
     # =========================================================
     sidebar_card("Auto-refresh & Source")
 
-    auto_refresh = st.checkbox("Rafraîchir automatiquement (URL)", value=False)  # ✅ OFF par défaut
-    refresh_sec = st.slider("Intervalle (secondes)", 30, 900, 300, 30)          # ✅ 300s conseillé
+    auto_refresh = st.checkbox("RafraÃ®chir automatiquement (URL)", value=False)  # âœ… OFF par dÃ©faut
+    refresh_sec = st.slider("Intervalle (secondes)", 30, 900, 300, 30)          # âœ… 300s conseillÃ©
 
     # 1) Heartbeat de rerun
     tick = 0
@@ -1780,13 +1780,13 @@ with st.sidebar:
         tick = st_autorefresh(interval=refresh_sec * 1000, key="iaid_refresh_tick")
 
 
-    if st.button("🔄 Rafraîchir maintenant"):
+    if st.button("ðŸ”„ RafraÃ®chir maintenant"):
         st.cache_data.clear()
         st.rerun()
 
 
     if import_mode == "URL (auto)":
-        st.caption("Recommandé Streamlit Cloud : lien direct vers un fichier .xlsx")
+        st.caption("RecommandÃ© Streamlit Cloud : lien direct vers un fichier .xlsx")
         default_url = str(safe_secret(CFG["secrets"]["excel_url"], ""))
         url = st.text_input("URL du fichier Excel (.xlsx)", value=default_url)
 
@@ -1805,11 +1805,11 @@ with st.sidebar:
                 file_bytes = fetch_excel_if_changed(url.strip(), signature)
                 source_label = f"URL smart ({signature})"
                 digest = hashlib.md5(file_bytes).hexdigest()[:10]
-                st.caption(f"📦 URL: {len(file_bytes)/1024:.1f} KB | md5: {digest} | tick={tick}")
+                st.caption(f"ðŸ“¦ URL: {len(file_bytes)/1024:.1f} KB | md5: {digest} | tick={tick}")
 
 
             except Exception as e:
-                st.error(f"Erreur téléchargement: {e}")
+                st.error(f"Erreur tÃ©lÃ©chargement: {e}")
 
 
 
@@ -1819,7 +1819,7 @@ with st.sidebar:
         if uploaded is not None:
             file_bytes = uploaded.getvalue()
             digest = hashlib.md5(file_bytes).hexdigest()[:10]
-            st.caption(f"📦 Fichier: {len(file_bytes)/1024:.1f} KB | md5: {digest}")
+            st.caption(f"ðŸ“¦ Fichier: {len(file_bytes)/1024:.1f} KB | md5: {digest}")
             source_label = f"Upload: {uploaded.name}"
 
     sidebar_card_end()
@@ -1827,24 +1827,24 @@ with st.sidebar:
     # =========================================================
     # 3) PERIODE COUVERTE
     # =========================================================
-    sidebar_card("Période couverte")
+    sidebar_card("PÃ©riode couverte")
 
     mois_min, mois_max = st.select_slider(
-    "Mois (de → à)",
+    "Mois (de â†’ Ã )",
     options=MOIS_COLS,
-    value=("Oct", "Août"),)
+    value=("Oct", "AoÃ»t"),)
 
     mois_couverts = MOIS_COLS[MOIS_COLS.index(mois_min): MOIS_COLS.index(mois_max) + 1]
 
     sidebar_card_end()
 
     # =========================================================
-    # 4) SEUILS D’ALERTE
+    # 4) SEUILS Dâ€™ALERTE
     # =========================================================
-    sidebar_card("Seuils d’alerte")
+    sidebar_card("Seuils dâ€™alerte")
 
     taux_vert = st.slider(
-        "Seuil Vert (Terminé/OK)",
+        "Seuil Vert (TerminÃ©/OK)",
         0.50, 1.00,
         float(DEFAULT_THRESHOLDS["taux_vert"]),
         0.05
@@ -1856,7 +1856,7 @@ with st.sidebar:
         0.05
     )
     ecart_critique = st.slider(
-        "Écart critique (heures)",
+        "Ã‰cart critique (heures)",
         -40, 0,
         int(DEFAULT_THRESHOLDS["ecart_critique"]),
         1
@@ -1881,10 +1881,10 @@ with st.sidebar:
     # =========================================================
     sidebar_card("Exports")
 
-    st.caption("Nom des fichiers générés (Excel / PDF).")
+    st.caption("Nom des fichiers gÃ©nÃ©rÃ©s (Excel / PDF).")
 
     export_prefix = st.text_input(
-        "Préfixe export",
+        "PrÃ©fixe export",
         value="Suivi_Classes",
     )
 
@@ -1894,7 +1894,7 @@ with st.sidebar:
     # =========================================================
     # 7) RAPPEL DG/DGE (MENSUEL)
     # =========================================================
-    sidebar_card("📩 Rappel DG/DGE (mensuel)")
+    sidebar_card("ðŸ“© Rappel DG/DGE (mensuel)")
 
     dashboard_url = str(safe_secret(CFG["secrets"]["dashboard_url"], ""))
     recips_raw = str(safe_secret(CFG["secrets"]["dg_emails"], ""))
@@ -1903,7 +1903,7 @@ with st.sidebar:
     today = dt.date.today()
     month_key = today.strftime("%Y-%m")  # ex: 2026-01
 
-    # --- Sécurité admin ---
+    # --- SÃ©curitÃ© admin ---
     pin = st.text_input("Code admin (PIN)", type="password").strip()
     admin_pin = str(safe_secret(CFG["secrets"]["admin_pin"], "")).strip()
     is_admin = (pin != "" and admin_pin != "" and pin == admin_pin)
@@ -1912,28 +1912,28 @@ with st.sidebar:
     st.session_state["is_admin"] = is_admin
 
 
-    subject = f"{CFG['email_prefix']} — Rappel mensuel de pilotage des enseignements ({today.strftime('%m/%Y')})"
+    subject = f"{CFG['email_prefix']} â€” Rappel mensuel de pilotage des enseignements ({today.strftime('%m/%Y')})"
     body_text = f"""
     {CFG["department_long"]}
-    Notification mensuelle — Pilotage des enseignements • {today.strftime('%m/%Y')}
-    Mise à jour : {dt.datetime.now().strftime('%d/%m/%Y %H:%M')}
+    Notification mensuelle â€” Pilotage des enseignements â€¢ {today.strftime('%m/%Y')}
+    Mise Ã  jour : {dt.datetime.now().strftime('%d/%m/%Y %H:%M')}
 
     Madame la Directrice,
 
-    Dans le cadre du suivi mensuel du pilotage académique, nous vous transmettons l’accès au Dashboard {CFG["dept_code"]}, plateforme institutionnelle permettant un suivi consolidé et continu des activités pédagogiques du département.
+    Dans le cadre du suivi mensuel du pilotage acadÃ©mique, nous vous transmettons lâ€™accÃ¨s au Dashboard {CFG["dept_code"]}, plateforme institutionnelle permettant un suivi consolidÃ© et continu des activitÃ©s pÃ©dagogiques du dÃ©partement.
 
     Ce tableau de bord permet notamment :
-    - Le suivi de l’état d’avancement des enseignements par classe et par matière
-    - L’analyse des volumes horaires prévus et réalisés
-    - L’identification des situations nécessitant une attention particulière (retards, non démarrés, écarts critiques)
-    - L’accès à des indicateurs synthétiques facilitant le pilotage décisionnel
-    - La génération de rapports consolidés (PDF officiels et exports Excel)
+    - Le suivi de lâ€™Ã©tat dâ€™avancement des enseignements par classe et par matiÃ¨re
+    - Lâ€™analyse des volumes horaires prÃ©vus et rÃ©alisÃ©s
+    - Lâ€™identification des situations nÃ©cessitant une attention particuliÃ¨re (retards, non dÃ©marrÃ©s, Ã©carts critiques)
+    - Lâ€™accÃ¨s Ã  des indicateurs synthÃ©tiques facilitant le pilotage dÃ©cisionnel
+    - La gÃ©nÃ©ration de rapports consolidÃ©s (PDF officiels et exports Excel)
 
-    Ouvrir le Dashboard {CFG["dept_code"]} →
+    Ouvrir le Dashboard {CFG["dept_code"]} â†’
     {dashboard_url}
 
-    📌 Informations clés
-    Période : {today.strftime('%m/%Y')}
+    ðŸ“Œ Informations clÃ©s
+    PÃ©riode : {today.strftime('%m/%Y')}
     Lien : {dashboard_url}
     """.strip()
 
@@ -1961,7 +1961,7 @@ with st.sidebar:
             color:#0F172A;
         ">
 
-            <!-- EN-TÊTE -->
+            <!-- EN-TÃŠTE -->
             <div style="
                 padding:22px 26px;
                 background:linear-gradient(90deg,#0B3D91,#1F6FEB);
@@ -1971,10 +1971,10 @@ with st.sidebar:
                 {CFG["department_long"]}
             </div>
             <div style="margin-top:6px;font-size:13px;font-weight:700;opacity:.95;">
-                Notification mensuelle — Pilotage des enseignements • {today.strftime('%m/%Y')}
+                Notification mensuelle â€” Pilotage des enseignements â€¢ {today.strftime('%m/%Y')}
             </div>
             <div style="margin-top:6px;font-size:12px;font-weight:700;opacity:.9;">
-                Mise à jour : {dt.datetime.now().strftime('%d/%m/%Y %H:%M')}
+                Mise Ã  jour : {dt.datetime.now().strftime('%d/%m/%Y %H:%M')}
             </div>
             </div>
 
@@ -1987,8 +1987,8 @@ with st.sidebar:
             </p>
 
             <p>
-                Dans le cadre du <b>suivi mensuel du pilotage académique</b>, nous vous transmettons l’accès au
-                <b>Dashboard {CFG["dept_code"]}</b>, plateforme institutionnelle permettant un suivi consolidé et continu des activités pédagogiques du département.
+                Dans le cadre du <b>suivi mensuel du pilotage acadÃ©mique</b>, nous vous transmettons lâ€™accÃ¨s au
+                <b>Dashboard {CFG["dept_code"]}</b>, plateforme institutionnelle permettant un suivi consolidÃ© et continu des activitÃ©s pÃ©dagogiques du dÃ©partement.
             </p>
 
             <p style="margin:0;">
@@ -1996,11 +1996,11 @@ with st.sidebar:
             </p>
 
             <ul style="margin:10px 0 0 18px;padding:0;">
-                <li>Le suivi de l’état d’avancement des enseignements par classe et par matière</li>
-                <li>L’analyse des volumes horaires prévus et réalisés (VHP / VHR)</li>
-                <li>L’identification des situations nécessitant une attention particulière (retards, non démarrés, écarts critiques)</li>
-                <li>L’accès à des indicateurs synthétiques facilitant le pilotage décisionnel</li>
-                <li>La génération de rapports consolidés (PDF officiels et exports Excel)</li>
+                <li>Le suivi de lâ€™Ã©tat dâ€™avancement des enseignements par classe et par matiÃ¨re</li>
+                <li>Lâ€™analyse des volumes horaires prÃ©vus et rÃ©alisÃ©s (VHP / VHR)</li>
+                <li>Lâ€™identification des situations nÃ©cessitant une attention particuliÃ¨re (retards, non dÃ©marrÃ©s, Ã©carts critiques)</li>
+                <li>Lâ€™accÃ¨s Ã  des indicateurs synthÃ©tiques facilitant le pilotage dÃ©cisionnel</li>
+                <li>La gÃ©nÃ©ration de rapports consolidÃ©s (PDF officiels et exports Excel)</li>
             </ul>
 
             <!-- BOUTON (bleu) -->
@@ -2016,12 +2016,12 @@ with st.sidebar:
                 font-size:14px;
                 box-shadow:0 10px 24px rgba(14,30,37,0.25);
                 ">
-                Ouvrir le Dashboard {CFG["dept_code"]} →
+                Ouvrir le Dashboard {CFG["dept_code"]} â†’
                 </a>
             </div>
 
 
-            <!-- INFOS CLÉS -->
+            <!-- INFOS CLÃ‰S -->
             <div style="
                 margin-top:24px;
                 background:#F6F8FC;
@@ -2030,9 +2030,9 @@ with st.sidebar:
                 padding:14px 16px;
             ">
                 <div style="font-weight:900;color:#0B3D91;margin-bottom:8px;">
-                📌 Informations clés
+                ðŸ“Œ Informations clÃ©s
                 </div>
-                <div style="font-size:13px;"><b>Période :</b> {today.strftime('%m/%Y')}</div>
+                <div style="font-size:13px;"><b>PÃ©riode :</b> {today.strftime('%m/%Y')}</div>
                 <div style="font-size:13px;">
                 <b>Lien :</b>
                 <a href="{dashboard_url}" style="color:#1F6FEB;text-decoration:none;">
@@ -2052,7 +2052,7 @@ with st.sidebar:
                 color:#475569;
                 text-align:center;
             ">
-            Message automatique — {CFG["department_long"]}
+            Message automatique â€” {CFG["department_long"]}
             </div>
 
         </div>
@@ -2083,21 +2083,21 @@ with st.sidebar:
                 body_html=body_html,
                 attachments=attachments or [],
             )
-            # 2) marquer envoyé pour le mois
+            # 2) marquer envoyÃ© pour le mois
             set_last_reminder_month(month_key)
 
         finally:
-            # 3) libérer le lock même en cas d'erreur
+            # 3) libÃ©rer le lock mÃªme en cas d'erreur
             clear_lock()
 
-    # Le bouton d'envoi est dans le tab Export (où les fichiers sont disponibles)
-    st.caption("📩 Le bouton d'envoi au DG se trouve en bas de l'onglet **Exports**.")
+    # Le bouton d'envoi est dans le tab Export (oÃ¹ les fichiers sont disponibles)
+    st.caption("ðŸ“© Le bouton d'envoi au DG se trouve en bas de l'onglet **Exports**.")
 
     sidebar_card_end()
 
 
 # =========================================================
-# ✅ HEADER (CLEAN) — zéro code affiché, zéro string parasite
+# âœ… HEADER (CLEAN) â€” zÃ©ro code affichÃ©, zÃ©ro string parasite
 # =========================================================
 
 now_str = dt.datetime.now().strftime("%d/%m/%Y %H:%M")
@@ -2118,9 +2118,9 @@ f"""
   </div>
 
   <div class="iaid-badges">
-    <div class="iaid-badge">Excel multi-feuilles → Consolidation automatique</div>
-    <div class="iaid-badge">KPIs • Alertes • Qualité</div>
-    <div class="iaid-badge">Exports : PDF officiel + Excel consolidé</div>
+    <div class="iaid-badge">Excel multi-feuilles â†’ Consolidation automatique</div>
+    <div class="iaid-badge">KPIs â€¢ Alertes â€¢ QualitÃ©</div>
+    <div class="iaid-badge">Exports : PDF officiel + Excel consolidÃ©</div>
   </div>
 </div>
 """,
@@ -2134,9 +2134,9 @@ unsafe_allow_html=True
 st.markdown(
 f"""
 <div class="footer-signature">
-  <strong>{CFG["author_name"]}</strong> — {CFG["author_role"]} • ✉️ {CFG["author_email"]}
+  <strong>{CFG["author_name"]}</strong> â€” {CFG["author_role"]} â€¢ âœ‰ï¸ {CFG["author_email"]}
   <br/>
-  <strong>{CFG["assistant_label"]} :</strong> {CFG["assistant_name"]} • ✉️ {CFG["assistant_email"]}
+  <strong>{CFG["assistant_label"]} :</strong> {CFG["assistant_name"]} â€¢ âœ‰ï¸ {CFG["assistant_email"]}
 </div>
 """,
 unsafe_allow_html=True
@@ -2148,7 +2148,7 @@ thresholds = {"taux_vert": taux_vert, "taux_orange": taux_orange, "ecart_critiqu
 
 
 if file_bytes is None:
-    st.info("➡️ Fournis une source (URL auto via Secrets ou Upload manuel).")
+    st.info("âž¡ï¸ Fournis une source (URL auto via Secrets ou Upload manuel).")
     st.stop()
 
 
@@ -2163,32 +2163,32 @@ df, quality = load_excel_all_sheets(file_bytes)
 #     st.rerun()
 
 if df.empty:
-    st.error("Aucune feuille exploitable. Vérifie que chaque feuille contient au minimum 'Matière' et 'VHP'.")
+    st.error("Aucune feuille exploitable. VÃ©rifie que chaque feuille contient au minimum 'MatiÃ¨re' et 'VHP'.")
     if quality:
-        st.write("### Détails qualité")
+        st.write("### DÃ©tails qualitÃ©")
         st.json(quality)
     st.stop()
 
-# Appliquer période couverte (recalcul VHR/Taux sur sous-ensemble)
+# Appliquer pÃ©riode couverte (recalcul VHR/Taux sur sous-ensemble)
 df_period = df.copy()
 df_period["VHR"] = df_period[mois_couverts].sum(axis=1)
-df_period["Écart"] = df_period["VHR"] - df_period["VHP"]
+df_period["Ã‰cart"] = df_period["VHR"] - df_period["VHP"]
 df_period["Taux"] = np.where(df_period["VHP"] == 0, 0, df_period["VHR"] / df_period["VHP"])
-df_period["Statut_auto"] = np.where(df_period["VHR"] <= 0, "Non démarré", np.where(df_period["VHR"] < df_period["VHP"], "En cours", "Terminé"))
+df_period["Statut_auto"] = np.where(df_period["VHR"] <= 0, "Non dÃ©marrÃ©", np.where(df_period["VHR"] < df_period["VHP"], "En cours", "TerminÃ©"))
 
 # =========================
 # FIX RESPONSABLE (IMPORTANT)
 # =========================
 df_period["Responsable"] = df_period["Responsable"].astype(str).replace({"nan":"", "None":""}).fillna("").str.strip()
-df_period["Responsable"] = df_period["Responsable"].replace({"": "⚠️ Non affecté"})
+df_period["Responsable"] = df_period["Responsable"].replace({"": "âš ï¸ Non affectÃ©"})
 
 # -----------------------------
-# Filtres avancés
+# Filtres avancÃ©s
 # -----------------------------
 st.sidebar.header("Filtres")
 
 # -----------------------------
-# Filtre Semestre (liste déroulante, défaut = S1)
+# Filtre Semestre (liste dÃ©roulante, dÃ©faut = S1)
 # -----------------------------
 # -----------------------------
 # Filtre Semestre (robuste)
@@ -2217,11 +2217,11 @@ classes = sorted(df_period["Classe"].dropna().unique().tolist())
 selected_classes = st.sidebar.multiselect("Classes", classes, default=classes)
 
 
-status_opts = ["Non démarré", "En cours", "Terminé"]
+status_opts = ["Non dÃ©marrÃ©", "En cours", "TerminÃ©"]
 selected_status = st.sidebar.multiselect("Statuts", status_opts, default=status_opts)
 
 # -----------------------------
-# Filtre Responsable (enseignant) — robuste
+# Filtre Responsable (enseignant) â€” robuste
 # -----------------------------
 responsables = sorted(df_period["Responsable"].unique().tolist())
 selected_responsables = st.sidebar.multiselect(
@@ -2232,11 +2232,11 @@ selected_responsables = st.sidebar.multiselect(
 
 
 
-search_matiere = st.sidebar.text_input("Recherche Matière (regex)", value="")
-show_only_delay = st.sidebar.checkbox("Uniquement retards (Écart < 0)", value=False)
+search_matiere = st.sidebar.text_input("Recherche MatiÃ¨re (regex)", value="")
+show_only_delay = st.sidebar.checkbox("Uniquement retards (Ã‰cart < 0)", value=False)
 min_vhp = st.sidebar.number_input("VHP min", min_value=0.0, value=0.0, step=1.0)
 # -----------------------------
-# Dataset BASE : ne dépend PAS des filtres Enseignant/Type
+# Dataset BASE : ne dÃ©pend PAS des filtres Enseignant/Type
 # -----------------------------
 filtered_base = df_period[
     df_period["Classe"].isin(selected_classes)
@@ -2244,7 +2244,7 @@ filtered_base = df_period[
     & (df_period["VHP"] >= min_vhp)
 ].copy()
 
-# Appliquer le filtre Responsable seulement si l’utilisateur a réduit la sélection
+# Appliquer le filtre Responsable seulement si lâ€™utilisateur a rÃ©duit la sÃ©lection
 if selected_responsables and set(selected_responsables) != set(responsables):
     filtered_base = filtered_base[filtered_base["Responsable"].isin(selected_responsables)]
 
@@ -2254,30 +2254,30 @@ if selected_responsables and set(selected_responsables) != set(responsables):
 if selected_semestre is not None:
     filtered_base = filtered_base[filtered_base["Semestre_norm"] == selected_semestre]
 
-# Recherche matière
+# Recherche matiÃ¨re
 if search_matiere.strip():
     try:
         filtered_base = filtered_base[
-            filtered_base["Matière"].str.contains(search_matiere, case=False, regex=True, na=False)
+            filtered_base["MatiÃ¨re"].str.contains(search_matiere, case=False, regex=True, na=False)
         ]
     except re.error:
-        st.sidebar.warning("Regex invalide — recherche ignorée.")
+        st.sidebar.warning("Regex invalide â€” recherche ignorÃ©e.")
 
 # Retards seulement
 if show_only_delay:
-    filtered_base = filtered_base[filtered_base["Écart"] < 0]
+    filtered_base = filtered_base[filtered_base["Ã‰cart"] < 0]
 
 # -----------------------------
 # Dataset final (sans Enseignant/Type)
 # -----------------------------
 filtered = filtered_base.copy()
 
-# Sécurité : colonnes optionnelles absentes dans certains fichiers Excel (ex: KM)
-for _col in ["Type", "Email", "Début prévu", "Fin prévue", "Responsable", "Observations"]:
+# SÃ©curitÃ© : colonnes optionnelles absentes dans certains fichiers Excel (ex: KM)
+for _col in ["Type", "Email", "DÃ©but prÃ©vu", "Fin prÃ©vue", "Responsable", "Observations"]:
     if _col not in filtered.columns:
         filtered[_col] = ""
 
-# ✅ Classes réellement disponibles après filtres (important pour l'onglet "Par classe")
+# âœ… Classes rÃ©ellement disponibles aprÃ¨s filtres (important pour l'onglet "Par classe")
 classes_filtered = sorted(filtered["Classe"].dropna().unique().tolist())
 if not classes_filtered:
     # fallback si filtre vide
@@ -2288,21 +2288,22 @@ if not classes_filtered:
 # Onglets (Ultra)
 # -----------------------------
 tab_overview, tab_classes, tab_matieres, tab_enseignants, tab_mensuel, tab_alertes, tab_qualite, tab_export = st.tabs(
-    ["Vue globale", "Par classe", "Par matière", "Par enseignant", "Analyse mensuelle", "Alertes", "Qualité des données", "Exports"]
+    ["Vue globale", "Par classe", "Par matiÃ¨re", "Par enseignant", "Analyse mensuelle", "Alertes", "QualitÃ© des donnÃ©es", "Exports"]
 )
 
 
 # ====== VUE GLOBALE ======
 with tab_overview:
-    st.subheader("KPIs globaux (période sélectionnée)")
+    st.subheader("KPIs globaux (pÃ©riode sÃ©lectionnÃ©e)")
 
-    # ----- Calculs KPI (DOIT être AVANT le HTML) -----
+    # ----- Calculs KPI (DOIT Ãªtre AVANT le HTML) -----
     total = int(len(filtered))
     taux_moy = float(filtered["Taux"].mean() * 100) if total else 0.0
-    nb_term = int((filtered["Statut_auto"] == "Terminé").sum())
+    nb_term = int((filtered["Statut_auto"] == "TerminÃ©").sum())
     nb_enc  = int((filtered["Statut_auto"] == "En cours").sum())
-    nb_nd   = int((filtered["Statut_auto"] == "Non démarré").sum())
+    nb_nd   = int((filtered["Statut_auto"] == "Non dÃ©marrÃ©").sum())
     retard_total = float(filtered.loc[filtered["Écart"] < 0, "Écart"].sum()) if total else 0.0
+    retard_total_abs = abs(retard_total)
 
     # ----- KPI en cartes HTML -----
     retard_class = "kpi-good"
@@ -2315,7 +2316,7 @@ with tab_overview:
         f"""
         <div class="kpi-grid">
           <div class="kpi kpi-good">
-            <div class="kpi-title">Matières</div>
+            <div class="kpi-title">MatiÃ¨res</div>
             <div class="kpi-value">{total}</div>
           </div>
 
@@ -2325,7 +2326,7 @@ with tab_overview:
           </div>
 
           <div class="kpi kpi-good">
-            <div class="kpi-title">Terminées</div>
+            <div class="kpi-title">TerminÃ©es</div>
             <div class="kpi-value">{nb_term}</div>
           </div>
 
@@ -2335,8 +2336,8 @@ with tab_overview:
           </div>
 
           <div class="kpi {retard_class}">
-            <div class="kpi-title">Retard cumulé (h)</div>
-            <div class="kpi-value">{retard_total:.0f}</div>
+            <div class="kpi-title">Charge à rattraper (h)</div>
+            <div class="kpi-value">{retard_total_abs:.0f}</div>
           </div>
         </div>
         """,
@@ -2363,35 +2364,35 @@ with tab_overview:
     fig.update_layout(height=420, margin=dict(l=10, r=10, t=60, b=10))
     st.plotly_chart(fig, use_container_width=True)
 
-    st.write("### Répartition des statuts")
+    st.write("### RÃ©partition des statuts")
     stat = filtered["Statut_auto"].value_counts().reset_index()
     stat.columns = ["Statut", "Nombre"]
-    fig = px.pie(stat, names="Statut", values="Nombre", title="Répartition des statuts")
+    fig = px.pie(stat, names="Statut", values="Nombre", title="RÃ©partition des statuts")
     fig.update_layout(height=420, margin=dict(l=10, r=10, t=60, b=10))
     st.plotly_chart(fig, use_container_width=True)
 
     # =========================================================
-    # ✅ TOP RETARDS (st.dataframe + emojis) — VERSION PRO
+    # âœ… TOP RETARDS (st.dataframe + emojis) â€” VERSION PRO
     # =========================================================
-    st.write("### Top retards (Écart le plus négatif)")
+    st.write("### Top retards (Ã‰cart le plus nÃ©gatif)")
 
-    top_retards = filtered.sort_values("Écart").head(20)[
-        ["Classe", "Matière", "VHP", "VHR", "Écart", "Taux", "Statut_auto", "Observations"]
+    top_retards = filtered.sort_values("Ã‰cart").head(20)[
+        ["Classe", "MatiÃ¨re", "VHP", "VHR", "Ã‰cart", "Taux", "Statut_auto", "Observations"]
     ].copy()
 
-    # ✅ Ajout colonnes lisibles
+    # âœ… Ajout colonnes lisibles
     top_retards["Taux (%)"] = (top_retards["Taux"] * 100).round(1)
     top_retards["Statut"] = top_retards["Statut_auto"].apply(statut_badge_text)
 
     st.dataframe(
-        top_retards[["Classe", "Matière", "VHP", "VHR", "Écart", "Taux (%)", "Statut", "Observations"]],
+        top_retards[["Classe", "MatiÃ¨re", "VHP", "VHR", "Ã‰cart", "Taux (%)", "Statut", "Observations"]],
         use_container_width=True,
         height=420,
         column_config={
             "Taux (%)": st.column_config.ProgressColumn(
                 "Taux (%)", min_value=0.0, max_value=100.0, format="%.1f%%"
             ),
-            "Écart": st.column_config.NumberColumn("Écart (h)", format="%.0f"),
+            "Ã‰cart": st.column_config.NumberColumn("Ã‰cart (h)", format="%.0f"),
             "VHP": st.column_config.NumberColumn("VHP", format="%.0f"),
             "VHR": st.column_config.NumberColumn("VHR", format="%.0f"),
             "Statut": st.column_config.TextColumn("Statut"),
@@ -2417,16 +2418,16 @@ with tab_classes:
 
 
     with colA:
-        st.write("### Tableau synthèse par classe")
+        st.write("### Tableau synthÃ¨se par classe")
 
         synth = filtered.groupby("Classe").agg(
-            Matieres=("Matière", "count"),
+            Matieres=("MatiÃ¨re", "count"),
             Taux_moy=("Taux", "mean"),
             VHP_total=("VHP", "sum"),
             VHR_total=("VHR", "sum"),
-            Retard_h=("Écart", lambda s: float(s[s < 0].sum())),
-            Terminees=("Statut_auto", lambda s: int((s == "Terminé").sum())),
-            Non_demarre=("Statut_auto", lambda s: int((s == "Non démarré").sum())),
+            Retard_h=("Ã‰cart", lambda s: float(s[s < 0].sum())),
+            Terminees=("Statut_auto", lambda s: int((s == "TerminÃ©").sum())),
+            Non_demarre=("Statut_auto", lambda s: int((s == "Non dÃ©marrÃ©").sum())),
         ).reset_index()
 
         synth_view = synth.copy()
@@ -2441,45 +2442,45 @@ with tab_classes:
                 "Retard_h": st.column_config.NumberColumn("Retard (h)", format="%.0f"),
                 "VHP_total": st.column_config.NumberColumn("VHP total", format="%.0f"),
                 "VHR_total": st.column_config.NumberColumn("VHR total", format="%.0f"),
-                "Matieres": st.column_config.NumberColumn("Matières", format="%d"),
-                "Terminees": st.column_config.NumberColumn("Terminées", format="%d"),
-                "Non_demarre": st.column_config.NumberColumn("Non démarré", format="%d"),
+                "Matieres": st.column_config.NumberColumn("MatiÃ¨res", format="%d"),
+                "Terminees": st.column_config.NumberColumn("TerminÃ©es", format="%d"),
+                "Non_demarre": st.column_config.NumberColumn("Non dÃ©marrÃ©", format="%d"),
             }
         )
 
     st.divider()
-    st.write(f"### Détails — {cls1} vs {cls2} (KPIs)")
+    st.write(f"### DÃ©tails â€” {cls1} vs {cls2} (KPIs)")
     A = filtered[filtered["Classe"] == cls1].copy()
     B = filtered[filtered["Classe"] == cls2].copy()
 
     def kpis(one: pd.DataFrame):
         return {
-            "Matières": len(one),
+            "MatiÃ¨res": len(one),
             "Taux moyen": float(one["Taux"].mean()*100) if len(one) else 0.0,
-            "Retard (h)": float(one.loc[one["Écart"] < 0, "Écart"].sum()) if len(one) else 0.0,
-            "Non démarré": int((one["Statut_auto"]=="Non démarré").sum()),
+            "Retard (h)": float(one.loc[one["Ã‰cart"] < 0, "Ã‰cart"].sum()) if len(one) else 0.0,
+            "Non dÃ©marrÃ©": int((one["Statut_auto"]=="Non dÃ©marrÃ©").sum()),
         }
 
     kA, kB = kpis(A), kpis(B)
     comp = pd.DataFrame({"Indicateur": list(kA.keys()), cls1: list(kA.values()), cls2: list(kB.values())})
     st.dataframe(comp, use_container_width=True)
 
-    st.write(f"### Retards (Top 15) — {cls1}")
-    tA = A.sort_values("Écart").head(15)[
-    ["Matière","VHP","VHR","Écart","Taux","Statut_auto","Observations"]
+    st.write(f"### Retards (Top 15) â€” {cls1}")
+    tA = A.sort_values("Ã‰cart").head(15)[
+    ["MatiÃ¨re","VHP","VHR","Ã‰cart","Taux","Statut_auto","Observations"]
     ].copy()
 
     tA["Taux (%)"] = (tA["Taux"] * 100).round(1)
     tA["Statut"] = tA["Statut_auto"].apply(statut_badge_text)
 
     st.dataframe(
-        tA[["Matière","VHP","VHR","Écart","Taux (%)","Statut","Observations"]],
+        tA[["MatiÃ¨re","VHP","VHR","Ã‰cart","Taux (%)","Statut","Observations"]],
         use_container_width=True,
         column_config={
             "Taux (%)": st.column_config.ProgressColumn(
                 "Taux (%)", min_value=0.0, max_value=100.0, format="%.1f%%"
             ),
-            "Écart": st.column_config.NumberColumn("Écart (h)", format="%.0f"),
+            "Ã‰cart": st.column_config.NumberColumn("Ã‰cart (h)", format="%.0f"),
             "VHP": st.column_config.NumberColumn("VHP", format="%.0f"),
             "VHR": st.column_config.NumberColumn("VHR", format="%.0f"),
             "Statut": st.column_config.TextColumn("Statut"),
@@ -2488,22 +2489,22 @@ with tab_classes:
 
 
 
-    st.write(f"### Retards (Top 15) — {cls2}")
-    tB = B.sort_values("Écart").head(15)[
-    ["Matière","VHP","VHR","Écart","Taux","Statut_auto","Observations"]
+    st.write(f"### Retards (Top 15) â€” {cls2}")
+    tB = B.sort_values("Ã‰cart").head(15)[
+    ["MatiÃ¨re","VHP","VHR","Ã‰cart","Taux","Statut_auto","Observations"]
     ].copy()
 
     tB["Taux (%)"] = (tB["Taux"] * 100).round(1)
     tB["Statut"] = tB["Statut_auto"].apply(statut_badge_text)
 
     st.dataframe(
-        tB[["Matière","VHP","VHR","Écart","Taux (%)","Statut","Observations"]],
+        tB[["MatiÃ¨re","VHP","VHR","Ã‰cart","Taux (%)","Statut","Observations"]],
         use_container_width=True,
         column_config={
             "Taux (%)": st.column_config.ProgressColumn(
                 "Taux (%)", min_value=0.0, max_value=100.0, format="%.1f%%"
             ),
-            "Écart": st.column_config.NumberColumn("Écart (h)", format="%.0f"),
+            "Ã‰cart": st.column_config.NumberColumn("Ã‰cart (h)", format="%.0f"),
             "VHP": st.column_config.NumberColumn("VHP", format="%.0f"),
             "VHR": st.column_config.NumberColumn("VHR", format="%.0f"),
             "Statut": st.column_config.TextColumn("Statut"),
@@ -2513,38 +2514,38 @@ with tab_classes:
 
 
 
-# ====== PAR MATIÈRE ======
+# ====== PAR MATIÃˆRE ======
 with tab_matieres:
-    st.subheader("Analyse par matière (toutes classes)")
+    st.subheader("Analyse par matiÃ¨re (toutes classes)")
 
-    # Agrégations
-    mat = filtered.groupby("Matière").agg(
+    # AgrÃ©gations
+    mat = filtered.groupby("MatiÃ¨re").agg(
         Classes=("Classe", "nunique"),
         VHP=("VHP", "sum"),
         VHR=("VHR", "sum"),
         Taux=("Taux", "mean"),
-        Retard=("Écart", lambda s: float(s[s < 0].sum())),
-        Non_demarre=("Statut_auto", lambda s: int((s=="Non démarré").sum())),
+        Retard=("Ã‰cart", lambda s: float(s[s < 0].sum())),
+        Non_demarre=("Statut_auto", lambda s: int((s=="Non dÃ©marrÃ©").sum())),
     ).reset_index()
     mat["Taux (%)"] = (mat["Taux"]*100).round(1)
     st.dataframe(mat.sort_values(["Taux (%)","Retard"], ascending=[True, True]), use_container_width=True)
 
-    st.write("### Matières en alerte (seuils)")
+    st.write("### MatiÃ¨res en alerte (seuils)")
     al = mat[(mat["Taux"] < thresholds["taux_orange"]) | (mat["Retard"] <= thresholds["ecart_critique"])].copy()
     if al.empty:
-        st.success("Aucune matière globale en alerte selon les seuils.")
+        st.success("Aucune matiÃ¨re globale en alerte selon les seuils.")
     else:
         st.dataframe(al.sort_values("Taux (%)").head(30), use_container_width=True)
 
 
 # ====== PAR ENSEIGNANT ======
 with tab_enseignants:
-    st.subheader("Suivi par enseignant (Responsable) — retards & charge")
+    st.subheader("Suivi par enseignant (Responsable) â€” retards & charge")
 
     tmp = filtered.copy()
 
     if "Responsable" not in tmp.columns:
-        st.warning("La colonne 'Responsable' n'existe pas dans les données.")
+        st.warning("La colonne 'Responsable' n'existe pas dans les donnÃ©es.")
     else:
         tmp["Responsable"] = (
             tmp["Responsable"].astype(str)
@@ -2553,28 +2554,28 @@ with tab_enseignants:
             .str.strip()
         )
 
-        # Inclure les modules non affectés (utile)
-        tmp["Responsable"] = tmp["Responsable"].replace({"": "⚠️ Non affecté"})
+        # Inclure les modules non affectÃ©s (utile)
+        tmp["Responsable"] = tmp["Responsable"].replace({"": "âš ï¸ Non affectÃ©"})
 
-        # 1) Synthèse par enseignant
+        # 1) SynthÃ¨se par enseignant
         synth_r = tmp.groupby("Responsable").agg(
-            Matieres=("Matière", "count"),
+            Matieres=("MatiÃ¨re", "count"),
             Classes=("Classe", "nunique"),
             VHP_total=("VHP", "sum"),
             VHR_total=("VHR", "sum"),
             Taux_moy=("Taux", "mean"),
-            Retard_h=("Écart", lambda s: float(s[s < 0].sum())),
-            Non_demarre=("Statut_auto", lambda s: int((s == "Non démarré").sum())),
+            Retard_h=("Ã‰cart", lambda s: float(s[s < 0].sum())),
+            Non_demarre=("Statut_auto", lambda s: int((s == "Non dÃ©marrÃ©").sum())),
             En_cours=("Statut_auto", lambda s: int((s == "En cours").sum())),
-            Termine=("Statut_auto", lambda s: int((s == "Terminé").sum())),
+            Termine=("Statut_auto", lambda s: int((s == "TerminÃ©").sum())),
         ).reset_index()
 
         synth_r["Taux (%)"] = (synth_r["Taux_moy"] * 100).round(1)
 
-        # tri : retard le plus critique d'abord (plus négatif)
+        # tri : retard le plus critique d'abord (plus nÃ©gatif)
         synth_r = synth_r.sort_values(["Retard_h", "Taux (%)"], ascending=[True, True])
 
-        st.write("### Synthèse par enseignant")
+        st.write("### SynthÃ¨se par enseignant")
         st.dataframe(
             synth_r[["Responsable","Matieres","Classes","Taux (%)","VHP_total","VHR_total","Retard_h","Non_demarre","En_cours","Termine"]],
             use_container_width=True,
@@ -2588,12 +2589,12 @@ with tab_enseignants:
 
         st.divider()
 
-        # 2) Top retards (détails)
-        st.write("### Top retards — détails par enseignant")
+        # 2) Top retards (dÃ©tails)
+        st.write("### Top retards â€” dÃ©tails par enseignant")
         top_n = st.slider("Nombre de lignes (Top retards)", 10, 200, 50, 10, key="top_retards_ens")
 
-        top_ret = tmp[tmp["Écart"] < 0].sort_values("Écart").head(top_n)[
-            ["Responsable","Classe","Matière","Semestre","VHP","VHR","Écart","Taux","Statut_auto","Observations"]
+        top_ret = tmp[tmp["Ã‰cart"] < 0].sort_values("Ã‰cart").head(top_n)[
+            ["Responsable","Classe","MatiÃ¨re","Semestre","VHP","VHR","Ã‰cart","Taux","Statut_auto","Observations"]
         ].copy()
 
         st.dataframe(
@@ -2601,7 +2602,7 @@ with tab_enseignants:
             use_container_width=True,
             column_config={
                 "Taux": st.column_config.ProgressColumn("Taux", min_value=0.0, max_value=1.0, format="%.0f%%"),
-                "Écart": st.column_config.NumberColumn("Écart (h)", format="%.0f"),
+                "Ã‰cart": st.column_config.NumberColumn("Ã‰cart (h)", format="%.0f"),
                 "VHP": st.column_config.NumberColumn("VHP", format="%.0f"),
                 "VHR": st.column_config.NumberColumn("VHR", format="%.0f"),
             }
@@ -2609,24 +2610,24 @@ with tab_enseignants:
 
         st.divider()
 
-        # 3) Non démarrés par enseignant
-        st.write("### Non démarrés — par enseignant")
-        nd = tmp[tmp["Statut_auto"] == "Non démarré"].groupby("Responsable").size().sort_values(ascending=False)
+        # 3) Non dÃ©marrÃ©s par enseignant
+        st.write("### Non dÃ©marrÃ©s â€” par enseignant")
+        nd = tmp[tmp["Statut_auto"] == "Non dÃ©marrÃ©"].groupby("Responsable").size().sort_values(ascending=False)
         if nd.empty:
-            st.success("Aucun 'Non démarré' avec les filtres actuels ✅")
+            st.success("Aucun 'Non dÃ©marrÃ©' avec les filtres actuels âœ…")
         else:
             st.bar_chart(nd)
 
         st.divider()
 
         # 4) Charge par enseignant
-        st.write("### Charge par enseignant — VHP prévu vs VHR réalisé")
+        st.write("### Charge par enseignant â€” VHP prÃ©vu vs VHR rÃ©alisÃ©")
         charge = tmp.groupby("Responsable").agg(
             VHP_total=("VHP", "sum"),
             VHR_total=("VHR", "sum"),
         ).reset_index()
-        charge["Écart_total"] = charge["VHR_total"] - charge["VHP_total"]
-        charge = charge.sort_values("Écart_total")
+        charge["Ã‰cart_total"] = charge["VHR_total"] - charge["VHP_total"]
+        charge = charge.sort_values("Ã‰cart_total")
 
         st.dataframe(
             charge,
@@ -2634,17 +2635,17 @@ with tab_enseignants:
             column_config={
                 "VHP_total": st.column_config.NumberColumn("VHP total", format="%.0f"),
                 "VHR_total": st.column_config.NumberColumn("VHR total", format="%.0f"),
-                "Écart_total": st.column_config.NumberColumn("Écart (h)", format="%.0f"),
+                "Ã‰cart_total": st.column_config.NumberColumn("Ã‰cart (h)", format="%.0f"),
             }
         )
 
 
 # ====== ANALYSE MENSUELLE ======
 with tab_mensuel:
-    st.subheader("Analyse mensuelle — heures réalisées & tendances")
+    st.subheader("Analyse mensuelle â€” heures rÃ©alisÃ©es & tendances")
 
     long = make_long(df_period)
-    # Appliquer filtres classes/statuts à la table longue via merge index
+    # Appliquer filtres classes/statuts Ã  la table longue via merge index
     ids = set(filtered["_rowid"].unique())
     long_f = long[long["_rowid"].isin(ids)]
 
@@ -2656,20 +2657,20 @@ with tab_mensuel:
     st.line_chart(monthly)
 
     # Heures par classe et mois (heat-like table)
-    st.write("### Matrice Classe × Mois (heures)")
+    st.write("### Matrice Classe Ã— Mois (heures)")
     pivot = long_f.pivot_table(index="Classe", columns="Mois", values="Heures", aggfunc="sum", fill_value=0).reindex(columns=MOIS_COLS)
     st.dataframe(style_table(pivot.reset_index()), use_container_width=True)
 
     cells = pivot.shape[0] * pivot.shape[1]  # nb classes * nb mois
     if cells > 250:
-        st.info("Heatmap désactivée (trop de données) → filtre quelques classes.")
+        st.info("Heatmap dÃ©sactivÃ©e (trop de donnÃ©es) â†’ filtre quelques classes.")
     else:
         fig = px.imshow(
             pivot.values,
             x=pivot.columns,
             y=pivot.index,
             aspect="auto",
-            title="Heatmap — Heures par classe et par mois"
+            title="Heatmap â€” Heures par classe et par mois"
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -2678,12 +2679,12 @@ with tab_mensuel:
     st.write("### Classe la plus active par mois")
 
     if pivot.empty:
-        st.warning("Aucune donnée mensuelle disponible avec les filtres actuels.")
+        st.warning("Aucune donnÃ©e mensuelle disponible avec les filtres actuels.")
     else:
         pivot_num = pivot.apply(pd.to_numeric, errors="coerce")
 
         if pivot_num.isna().all().all():
-            st.warning("Aucune valeur numérique exploitable pour déterminer la classe top par mois.")
+            st.warning("Aucune valeur numÃ©rique exploitable pour dÃ©terminer la classe top par mois.")
         else:
             top_by_month = pivot_num.idxmax(axis=0).to_frame(name="Classe top").T
             st.dataframe(top_by_month, use_container_width=True)
@@ -2691,46 +2692,46 @@ with tab_mensuel:
 
 # ====== ALERTES ======
 with tab_alertes:
-    st.subheader("Alertes intelligentes (paramétrables)")
+    st.subheader("Alertes intelligentes (paramÃ©trables)")
 
     # --- Base calcul alertes ---
     tmp = filtered.copy()
 
-    # Sécurités colonnes (au cas où certaines feuilles n'ont pas ces champs)
-    for col in ["Début prévu", "Fin prévue", "Type", "Email"]:
+    # SÃ©curitÃ©s colonnes (au cas oÃ¹ certaines feuilles n'ont pas ces champs)
+    for col in ["DÃ©but prÃ©vu", "Fin prÃ©vue", "Type", "Email"]:
         if col not in tmp.columns:
             tmp[col] = ""
 
-    tmp["Début_dt"] = pd.to_datetime(tmp["Début prévu"], errors="coerce", dayfirst=True)
-    tmp["Fin_dt"]   = pd.to_datetime(tmp["Fin prévue"], errors="coerce", dayfirst=True)
+    tmp["DÃ©but_dt"] = pd.to_datetime(tmp["DÃ©but prÃ©vu"], errors="coerce", dayfirst=True)
+    tmp["Fin_dt"]   = pd.to_datetime(tmp["Fin prÃ©vue"], errors="coerce", dayfirst=True)
     today_dt = pd.Timestamp(dt.date.today())
 
-    # --- Règles ---
-    tmp["Alerte_retard_critique"] = (tmp["Écart"] <= thresholds["ecart_critique"])
-    tmp["Alerte_non_demarre"] = (tmp["Statut_auto"] == "Non démarré") & (
-        tmp["Début_dt"].isna() | (tmp["Début_dt"] <= today_dt)
+    # --- RÃ¨gles ---
+    tmp["Alerte_retard_critique"] = (tmp["Ã‰cart"] <= thresholds["ecart_critique"])
+    tmp["Alerte_non_demarre"] = (tmp["Statut_auto"] == "Non dÃ©marrÃ©") & (
+        tmp["DÃ©but_dt"].isna() | (tmp["DÃ©but_dt"] <= today_dt)
     )
-    tmp["Alerte_fin_depassee"] = (tmp["Statut_auto"] != "Terminé") & tmp["Fin_dt"].notna() & (tmp["Fin_dt"] < today_dt)
+    tmp["Alerte_fin_depassee"] = (tmp["Statut_auto"] != "TerminÃ©") & tmp["Fin_dt"].notna() & (tmp["Fin_dt"] < today_dt)
 
-    # Vectorized (évite apply row-by-row, ~10x plus rapide)
-    _fin = np.where(tmp["Alerte_fin_depassee"], "⛔ Fin dépassée", "")
-    _ret = np.where(tmp["Alerte_retard_critique"], "🔻 Retard critique", "")
-    _nd  = np.where(tmp["Alerte_non_demarre"], "🛑 Non démarré", "")
-    _sep1 = np.where((_fin != "") & (_ret != ""), " • ", "")
+    # Vectorized (Ã©vite apply row-by-row, ~10x plus rapide)
+    _fin = np.where(tmp["Alerte_fin_depassee"], "â›” Fin dÃ©passÃ©e", "")
+    _ret = np.where(tmp["Alerte_retard_critique"], "ðŸ”» Retard critique", "")
+    _nd  = np.where(tmp["Alerte_non_demarre"], "ðŸ›‘ Non dÃ©marrÃ©", "")
+    _sep1 = np.where((_fin != "") & (_ret != ""), " â€¢ ", "")
     _ab   = np.char.add(np.char.add(_fin, _sep1), _ret)
-    _sep2 = np.where((_ab != "") & (_nd != ""), " • ", "")
+    _sep2 = np.where((_ab != "") & (_nd != ""), " â€¢ ", "")
     tmp["Raison_alerte"] = pd.Series(
         np.char.add(np.char.add(_ab, _sep2), _nd), index=tmp.index
     )
     tmp["En_alerte"] = tmp["Raison_alerte"].ne("")
 
-    # Priorité (fin dépassée > retard critique > non démarré) puis écart
+    # PrioritÃ© (fin dÃ©passÃ©e > retard critique > non dÃ©marrÃ©) puis Ã©cart
     tmp["_prio"] = (
         tmp["Alerte_fin_depassee"].astype(int) * 3
         + tmp["Alerte_retard_critique"].astype(int) * 2
         + tmp["Alerte_non_demarre"].astype(int) * 1
     )
-    tmp = tmp.sort_values(["_prio", "Écart"], ascending=[False, True])
+    tmp = tmp.sort_values(["_prio", "Ã‰cart"], ascending=[False, True])
 
     # --- KPIs alertes ---
     nb_alertes = int(tmp["En_alerte"].sum())
@@ -2742,59 +2743,59 @@ with tab_alertes:
         f"""
         <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:10px 0 4px 0;">
           <div class="kpi kpi-bad"><div class="kpi-title">Total alertes</div><div class="kpi-value">{nb_alertes}</div></div>
-          <div class="kpi kpi-bad"><div class="kpi-title">Fin dépassée</div><div class="kpi-value">{nb_fin}</div></div>
+          <div class="kpi kpi-bad"><div class="kpi-title">Fin dÃ©passÃ©e</div><div class="kpi-value">{nb_fin}</div></div>
           <div class="kpi kpi-bad"><div class="kpi-title">Retards critiques</div><div class="kpi-value">{nb_ret}</div></div>
-          <div class="kpi kpi-warn"><div class="kpi-title">Non démarrés</div><div class="kpi-value">{nb_nd}</div></div>
+          <div class="kpi kpi-warn"><div class="kpi-title">Non dÃ©marrÃ©s</div><div class="kpi-value">{nb_nd}</div></div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    st.caption("💡 Onglet propre : lecture (Vue priorisée) séparée de l’envoi (Par enseignant).")
+    st.caption("ðŸ’¡ Onglet propre : lecture (Vue priorisÃ©e) sÃ©parÃ©e de lâ€™envoi (Par enseignant).")
     st.divider()
 
     # --- Sous-onglets internes ---
-    t1, t2, t3 = st.tabs(["📌 Vue priorisée", "📧 Par enseignant", "📊 Graphiques"])
+    t1, t2, t3 = st.tabs(["ðŸ“Œ Vue priorisÃ©e", "ðŸ“§ Par enseignant", "ðŸ“Š Graphiques"])
 
     # =========================================================
-    # 1) VUE PRIORISÉE
+    # 1) VUE PRIORISÃ‰E
     # =========================================================
     with t1:
-        st.write("### Liste des alertes (priorisées)")
+        st.write("### Liste des alertes (priorisÃ©es)")
 
         alerts = tmp.loc[
             tmp["En_alerte"],
-            ["Classe","Matière","VHP","VHR","Écart","Taux","Statut_auto","Raison_alerte","Observations"]
+            ["Classe","MatiÃ¨re","VHP","VHR","Ã‰cart","Taux","Statut_auto","Raison_alerte","Observations"]
         ].copy()
 
         alerts["Taux (%)"] = (alerts["Taux"] * 100).round(1)
         alerts["Statut"] = alerts["Statut_auto"].apply(statut_badge_text)
 
         st.dataframe(
-            alerts[["Classe","Matière","VHP","VHR","Écart","Taux (%)","Statut","Raison_alerte","Observations"]],
+            alerts[["Classe","MatiÃ¨re","VHP","VHR","Ã‰cart","Taux (%)","Statut","Raison_alerte","Observations"]],
             use_container_width=True,
             height=520,
             column_config={
                 "Taux (%)": st.column_config.ProgressColumn("Taux (%)", min_value=0.0, max_value=100.0, format="%.1f%%"),
-                "Écart": st.column_config.NumberColumn("Écart (h)", format="%.0f"),
+                "Ã‰cart": st.column_config.NumberColumn("Ã‰cart (h)", format="%.0f"),
                 "VHP": st.column_config.NumberColumn("VHP", format="%.0f"),
                 "VHR": st.column_config.NumberColumn("VHR", format="%.0f"),
             }
         )
 
-        st.caption("✅ Ici : lecture uniquement (pas de boutons d’envoi).")
+        st.caption("âœ… Ici : lecture uniquement (pas de boutons dâ€™envoi).")
 
     # =========================================================
     # 2) PAR ENSEIGNANT (LOT + SELECTION + ENVOI)
     # =========================================================
     # =========================================================
-    # 2) PAR ENSEIGNANT (LOT + SELECTION + ENVOI) — HTML POUR TOUS LES LOTS ✅
+    # 2) PAR ENSEIGNANT (LOT + SELECTION + ENVOI) â€” HTML POUR TOUS LES LOTS âœ…
     # =========================================================
     with t2:
-        st.write("### Préparation : notifications par enseignant (1 email / enseignant)")
+        st.write("### PrÃ©paration : notifications par enseignant (1 email / enseignant)")
 
         # ---------------------------------------------------------
-        # 0) Sécurités colonnes
+        # 0) SÃ©curitÃ©s colonnes
         # ---------------------------------------------------------
         for col in ["Email", "Type", "Semestre", "Observations"]:
             if col not in tmp.columns:
@@ -2808,22 +2809,22 @@ with tab_alertes:
             .str.lower()
         )
 
-        st.caption("✅ 1 email par enseignant (Email).")
+        st.caption("âœ… 1 email par enseignant (Email).")
 
         # ---------------------------------------------------------
         # 1) Choix du lot
         # ---------------------------------------------------------
-        st.write("### 🎯 Choisir le lot à envoyer")
+        st.write("### ðŸŽ¯ Choisir le lot Ã  envoyer")
 
         lot = st.selectbox(
             "Type d'envoi",
             [
-                "🚨 Toutes les alertes (Non démarré + Retard critique + Fin dépassée)",
-                "🛑 Seulement Non démarré",
-                "🔻 Seulement Retard critique",
-                "⛔ Seulement Fin dépassée",
-                "📌 Information : En cours (pas alerte)",
-                "✅ Information : Terminé (pas alerte)",
+                "ðŸš¨ Toutes les alertes (Non dÃ©marrÃ© + Retard critique + Fin dÃ©passÃ©e)",
+                "ðŸ›‘ Seulement Non dÃ©marrÃ©",
+                "ðŸ”» Seulement Retard critique",
+                "â›” Seulement Fin dÃ©passÃ©e",
+                "ðŸ“Œ Information : En cours (pas alerte)",
+                "âœ… Information : TerminÃ© (pas alerte)",
             ],
             index=0,
             key="lot_prof"
@@ -2836,8 +2837,8 @@ with tab_alertes:
         base = tmp[tmp["Email"].str.contains("@", na=False)].copy()
 
         cols_keep = [
-            "Responsable", "Email", "Classe", "Matière", "Semestre", "Type",
-            "VHP", "VHR", "Écart", "Taux", "Statut_auto",
+            "Responsable", "Email", "Classe", "MatiÃ¨re", "Semestre", "Type",
+            "VHP", "VHR", "Ã‰cart", "Taux", "Statut_auto",
             "Raison_alerte", "Observations",
             "Alerte_non_demarre", "Alerte_retard_critique", "Alerte_fin_depassee"
         ]
@@ -2845,23 +2846,23 @@ with tab_alertes:
             if c not in base.columns:
                 base[c] = ""
 
-        if lot.startswith("🚨"):
+        if lot.startswith("ðŸš¨"):
             alerts_send = base[base["En_alerte"]].copy()
-        elif lot.startswith("🛑"):
+        elif lot.startswith("ðŸ›‘"):
             alerts_send = base[base["Alerte_non_demarre"]].copy()
-        elif lot.startswith("🔻"):
+        elif lot.startswith("ðŸ”»"):
             alerts_send = base[base["Alerte_retard_critique"]].copy()
-        elif lot.startswith("⛔"):
+        elif lot.startswith("â›”"):
             alerts_send = base[base["Alerte_fin_depassee"]].copy()
-        elif lot.startswith("📌"):
+        elif lot.startswith("ðŸ“Œ"):
             alerts_send = base[base["Statut_auto"] == "En cours"].copy()
-        else:  # ✅ Terminé
-            alerts_send = base[base["Statut_auto"] == "Terminé"].copy()
+        else:  # âœ… TerminÃ©
+            alerts_send = base[base["Statut_auto"] == "TerminÃ©"].copy()
 
         alerts_send = alerts_send[cols_keep].copy()
 
         # Nettoyage texte
-        for c in ["Responsable", "Classe", "Matière", "Semestre", "Type", "Raison_alerte", "Observations"]:
+        for c in ["Responsable", "Classe", "MatiÃ¨re", "Semestre", "Type", "Raison_alerte", "Observations"]:
             alerts_send[c] = (
                 alerts_send[c].astype(str)
                 .replace({"nan": "", "None": ""})
@@ -2874,31 +2875,31 @@ with tab_alertes:
         # 3) Si vide -> on affiche ET ON N'ARRETE PAS L'APP
         # ---------------------------------------------------------
         if alerts_send.empty:
-            st.info("Aucune ligne à envoyer pour ce lot (ou emails manquants).")
-            st.caption("➡️ Vérifie que les enseignants ont bien une colonne Email renseignée.")
+            st.info("Aucune ligne Ã  envoyer pour ce lot (ou emails manquants).")
+            st.caption("âž¡ï¸ VÃ©rifie que les enseignants ont bien une colonne Email renseignÃ©e.")
         else:
             # ---------------------------------------------------------
-            # 4) Synthèse par enseignant (sur le lot choisi)
+            # 4) SynthÃ¨se par enseignant (sur le lot choisi)
             # ---------------------------------------------------------
             synth_prof = alerts_send.groupby(["Responsable", "Email"]).agg(
-                Nb_lignes=("Matière", "count"),
-                Nb_non_demarre=("Statut_auto", lambda s: int((s == "Non démarré").sum())),
+                Nb_lignes=("MatiÃ¨re", "count"),
+                Nb_non_demarre=("Statut_auto", lambda s: int((s == "Non dÃ©marrÃ©").sum())),
                 Nb_en_cours=("Statut_auto", lambda s: int((s == "En cours").sum())),
-                Nb_termine=("Statut_auto", lambda s: int((s == "Terminé").sum())),
+                Nb_termine=("Statut_auto", lambda s: int((s == "TerminÃ©").sum())),
             ).reset_index().sort_values("Nb_lignes", ascending=False)
 
-            st.write("### Synthèse (lot sélectionné)")
+            st.write("### SynthÃ¨se (lot sÃ©lectionnÃ©)")
             st.dataframe(synth_prof, use_container_width=True, height=260)
 
             # ---------------------------------------------------------
-            # 5) Sélection des enseignants (IMPORTANT : basé sur alerts_send)
+            # 5) SÃ©lection des enseignants (IMPORTANT : basÃ© sur alerts_send)
             # ---------------------------------------------------------
-            st.write("### 👥 Choisir les enseignants (avant envoi)")
+            st.write("### ðŸ‘¥ Choisir les enseignants (avant envoi)")
 
             profs_dispo = sorted([p for p in alerts_send["Responsable"].unique().tolist() if str(p).strip() != ""])
 
             profs_sel = st.multiselect(
-                "Enseignants à notifier",
+                "Enseignants Ã  notifier",
                 options=profs_dispo,
                 default=profs_dispo,
                 key="profs_sel"
@@ -2908,11 +2909,11 @@ with tab_alertes:
             alerts_send_sel["Statut"] = alerts_send_sel["Statut_auto"].apply(statut_badge_text)
 
 
-            st.caption(f"📌 Enseignants sélectionnés : {len(profs_sel)} | Lignes à envoyer : {len(alerts_send_sel)}")
+            st.caption(f"ðŸ“Œ Enseignants sÃ©lectionnÃ©s : {len(profs_sel)} | Lignes Ã  envoyer : {len(alerts_send_sel)}")
 
-            st.write("Aperçu (lot sélectionné) :")
+            st.write("AperÃ§u (lot sÃ©lectionnÃ©) :")
             st.dataframe(
-                alerts_send_sel[["Responsable","Email","Classe","Semestre","Type","Matière","Écart","Statut","Raison_alerte","Observations"]].head(80),
+                alerts_send_sel[["Responsable","Email","Classe","Semestre","Type","MatiÃ¨re","Ã‰cart","Statut","Raison_alerte","Observations"]].head(80),
                 use_container_width=True,
                 height=320
             )
@@ -2922,15 +2923,15 @@ with tab_alertes:
             # ---------------------------------------------------------
             # 6) Envoi (admin)
             # ---------------------------------------------------------
-            st.write("### 🚀 Envoyer (admin)")
+            st.write("### ðŸš€ Envoyer (admin)")
 
-            if st.button("📩 Envoyer maintenant aux enseignants", key="send_prof_alerts"):
+            if st.button("ðŸ“© Envoyer maintenant aux enseignants", key="send_prof_alerts"):
                 if not st.session_state.get("is_admin", False):
-                    st.error("Accès refusé : PIN incorrect.")
+                    st.error("AccÃ¨s refusÃ© : PIN incorrect.")
                     st.stop()
 
                 if alerts_send_sel.empty:
-                    st.warning("Aucune ligne à envoyer (vérifie lot + sélection).")
+                    st.warning("Aucune ligne Ã  envoyer (vÃ©rifie lot + sÃ©lection).")
                     st.stop()
 
                 sent, errors = 0, 0
@@ -2939,24 +2940,24 @@ with tab_alertes:
                 for (prof, mail), gprof in grp:
                     # Texte fallback
                     lignes_txt = []
-                    for _, r in gprof.sort_values(["Statut_auto", "Écart"]).iterrows():
+                    for _, r in gprof.sort_values(["Statut_auto", "Ã‰cart"]).iterrows():
                         lignes_txt.append(
-                            f"- {r.get('Classe','')} | {r.get('Semestre','')} | {r.get('Type','')} | {r.get('Matière','')} | "
+                            f"- {r.get('Classe','')} | {r.get('Semestre','')} | {r.get('Type','')} | {r.get('MatiÃ¨re','')} | "
                             f"VHP={int(float(r.get('VHP',0) or 0))} VHR={int(float(r.get('VHR',0) or 0))} "
-                            f"Écart={int(float(r.get('Écart',0) or 0))} | {r.get('Statut_auto','')} | {r.get('Raison_alerte','')}"
+                            f"Ã‰cart={int(float(r.get('Ã‰cart',0) or 0))} | {r.get('Statut_auto','')} | {r.get('Raison_alerte','')}"
                         )
 
                     body_text_prof = (
-                        f"{CFG['dept_code']} — Notification de suivi des enseignements\n"
-                        f"Période : {mois_min} → {mois_max}\n\n"
+                        f"{CFG['dept_code']} â€” Notification de suivi des enseignements\n"
+                        f"PÃ©riode : {mois_min} â†’ {mois_max}\n\n"
                         f"Bonjour {prof},\n\n"
                         f"Lot : {lot}\n"
-                        f"Éléments concernés : {len(gprof)}\n\n"
+                        f"Ã‰lÃ©ments concernÃ©s : {len(gprof)}\n\n"
                         + "\n".join(lignes_txt)
                         + f"\n\n{CFG['department_long']}\n"
                     )
 
-                    # ✅ HTML : tu as déjà build_prof_email_html global, on l’utilise ici
+                    # âœ… HTML : tu as dÃ©jÃ  build_prof_email_html global, on lâ€™utilise ici
                     body_html_prof = build_prof_email_html(
                         prof=prof,
                         lot_label=lot,
@@ -2967,7 +2968,7 @@ with tab_alertes:
                         cfg=CFG,
                     )
 
-                    subject_prof = f"{CFG['dept_code']} — Notification ({mois_min}→{mois_max}) : {lot.split(' ',1)[1]} — {len(gprof)} élément(s)"
+                    subject_prof = f"{CFG['dept_code']} â€” Notification ({mois_min}â†’{mois_max}) : {lot.split(' ',1)[1]} â€” {len(gprof)} Ã©lÃ©ment(s)"
                     try:
                         cfg_smtp = _get_smtp_config()
                         send_email_reminder(
@@ -2984,45 +2985,45 @@ with tab_alertes:
                         sent += 1
                     except Exception as e:
                         errors += 1
-                        st.error(f"Erreur envoi à {prof} ({mail}) : {e}")
+                        st.error(f"Erreur envoi Ã  {prof} ({mail}) : {e}")
 
                 if sent:
-                    st.success(f"✅ Emails envoyés à {sent} enseignant(s).")
+                    st.success(f"âœ… Emails envoyÃ©s Ã  {sent} enseignant(s).")
                 if errors:
-                    st.warning(f"⚠️ {errors} envoi(s) en échec.")
+                    st.warning(f"âš ï¸ {errors} envoi(s) en Ã©chec.")
 
 
     # =========================================================
     # 3) GRAPHIQUES
     # =========================================================
     with t3:
-        st.write("### Non démarré — par classe")
+        st.write("### Non dÃ©marrÃ© â€” par classe")
         nd = tmp[tmp["Alerte_non_demarre"]].groupby("Classe").size().sort_values(ascending=False)
         st.bar_chart(nd)
 
-        st.write("### Retards critiques — par classe")
+        st.write("### Retards critiques â€” par classe")
         crit = tmp[tmp["Alerte_retard_critique"]].groupby("Classe").size().sort_values(ascending=False)
         st.bar_chart(crit)
 
-        st.write("### Fin dépassée — par classe")
+        st.write("### Fin dÃ©passÃ©e â€” par classe")
         fin = tmp[tmp["Alerte_fin_depassee"]].groupby("Classe").size().sort_values(ascending=False)
         st.bar_chart(fin)
 
 
-# ====== QUALITÉ DES DONNÉES ======
+# ====== QUALITÃ‰ DES DONNÃ‰ES ======
 with tab_qualite:
-    st.subheader("Contrôles qualité & hygiène des données")
+    st.subheader("ContrÃ´les qualitÃ© & hygiÃ¨ne des donnÃ©es")
     if quality:
         st.write("### Alertes structurelles (lecture/colonnes)")
         st.json(quality)
     else:
-        st.success("Aucune alerte structurelle détectée.")
+        st.success("Aucune alerte structurelle dÃ©tectÃ©e.")
 
-    st.write("### Statistiques de complétude")
+    st.write("### Statistiques de complÃ©tude")
     qc = pd.DataFrame({
-        "Champ": ["Matière vide", "VHP <= 0", "Valeurs mois manquantes (moyenne)"],
+        "Champ": ["MatiÃ¨re vide", "VHP <= 0", "Valeurs mois manquantes (moyenne)"],
         "Taux": [
-            float(df_period["Matière_vide"].mean()),
+            float(df_period["MatiÃ¨re_vide"].mean()),
             float((df_period["VHP"] <= 0).mean()),
             float(df_period[MOIS_COLS].isna().mean().mean()),
         ],
@@ -3030,9 +3031,9 @@ with tab_qualite:
     qc["Taux"] = (qc["Taux"]*100).round(2).astype(str) + "%"
     st.dataframe(qc, use_container_width=True)
 
-    st.write("### Lignes suspectes (à corriger)")
-    suspects = df_period[df_period["Matière_vide"] | (df_period["VHP"]<=0)].head(100)
-    st.dataframe(suspects[["Classe","Matière","VHP"] + MOIS_COLS], use_container_width=True)
+    st.write("### Lignes suspectes (Ã  corriger)")
+    suspects = df_period[df_period["MatiÃ¨re_vide"] | (df_period["VHP"]<=0)].head(100)
+    st.dataframe(suspects[["Classe","MatiÃ¨re","VHP"] + MOIS_COLS], use_container_width=True)
 
 # ====== EXPORTS ======
 with tab_export:
@@ -3041,53 +3042,53 @@ with tab_export:
     if "obs_ai_md" not in st.session_state:
         st.session_state["obs_ai_md"] = None
 
-    st.subheader("Exports (Excel consolidé + PDF officiel)")
-    st.caption("Les exports respectent les filtres actifs + la période sélectionnée.")
+    st.subheader("Exports (Excel consolidÃ© + PDF officiel)")
+    st.caption("Les exports respectent les filtres actifs + la pÃ©riode sÃ©lectionnÃ©e.")
 
     col1, col2 = st.columns(2)
 
     # =========================================================
-    # 1) EXCEL CONSOLIDÉ
+    # 1) EXCEL CONSOLIDÃ‰
     # =========================================================
     with col1:
-        st.write("### Export Excel consolidé")
+        st.write("### Export Excel consolidÃ©")
 
         export_df = filtered[
-            ["Classe","Semestre","Matière","Début prévu","Fin prévue","VHP"]
+            ["Classe","Semestre","MatiÃ¨re","DÃ©but prÃ©vu","Fin prÃ©vue","VHP"]
             + MOIS_COLS
-            + ["VHR","Écart","Taux","Statut_auto","Observations"]
+            + ["VHR","Ã‰cart","Taux","Statut_auto","Observations"]
         ].copy()
 
         export_df["Taux"] = (export_df["Taux"]*100).round(2)
 
         synth_class = filtered.groupby("Classe").agg(
-            Matieres=("Matière","count"),
+            Matieres=("MatiÃ¨re","count"),
             Taux_moy=("Taux","mean"),
             VHP_total=("VHP","sum"),
             VHR_total=("VHR","sum"),
-            Retard_h=("Écart", lambda s: float(s[s<0].sum()))
+            Retard_h=("Ã‰cart", lambda s: float(s[s<0].sum()))
         ).reset_index()
         synth_class["Taux_moy"] = (synth_class["Taux_moy"]*100).round(2)
 
         synth_resp = filtered.groupby("Responsable").agg(
-            Matieres=("Matière","count"),
+            Matieres=("MatiÃ¨re","count"),
             Classes=("Classe","nunique"),
             VHP_total=("VHP","sum"),
             VHR_total=("VHR","sum"),
             Taux_moy=("Taux","mean"),
-            Retard_h=("Écart", lambda s: float(s[s<0].sum())),
-            Non_demarre=("Statut_auto", lambda s: int((s=="Non démarré").sum())),
+            Retard_h=("Ã‰cart", lambda s: float(s[s<0].sum())),
+            Non_demarre=("Statut_auto", lambda s: int((s=="Non dÃ©marrÃ©").sum())),
         ).reset_index()
         synth_resp["Taux_moy"] = (synth_resp["Taux_moy"]*100).round(2)
 
         xbytes = df_to_excel_bytes({
-            "Consolidé": export_df,
+            "ConsolidÃ©": export_df,
             "Synthese_Classes": synth_class,
             "Synthese_Responsables": synth_resp,
         })
 
         st.download_button(
-            "⬇️ Télécharger l’Excel consolidé",
+            "â¬‡ï¸ TÃ©lÃ©charger lâ€™Excel consolidÃ©",
             data=xbytes,
             file_name=f"{export_prefix}_consolide.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -3104,18 +3105,18 @@ with tab_export:
 
         pdf_title = st.text_input(
             "Titre du rapport PDF",
-            value=f"Rapport mensuel — Suivi des enseignements ({CFG['dept_code']}) | {CFG['department_long']}",
+            value=f"Rapport mensuel â€” Suivi des enseignements ({CFG['dept_code']}) | {CFG['department_long']}",
             key="pdf_title_export"
         )
 
         logo_bytes = logo.getvalue() if logo else None
 
-        if st.button("Générer le PDF", key="btn_pdf_main"):
+        if st.button("GÃ©nÃ©rer le PDF", key="btn_pdf_main"):
             pdf = build_pdf_report(
                 df=filtered[
-                    ["Classe","Semestre","Matière","Début prévu","Fin prévue","VHP"]
+                    ["Classe","Semestre","MatiÃ¨re","DÃ©but prÃ©vu","Fin prÃ©vue","VHP"]
                     + mois_couverts
-                    + ["VHR","Écart","Taux","Statut_auto","Observations"]
+                    + ["VHR","Ã‰cart","Taux","Statut_auto","Observations"]
                 ].copy(),
                 title=pdf_title,
                 mois_couverts=mois_couverts,
@@ -3128,7 +3129,7 @@ with tab_export:
             )
 
             st.download_button(
-                "⬇️ Télécharger le PDF",
+                "â¬‡ï¸ TÃ©lÃ©charger le PDF",
                 data=pdf,
                 file_name=f"{export_prefix}_rapport.pdf",
                 mime="application/pdf",
@@ -3142,14 +3143,14 @@ with tab_export:
 
         pdf_obs_title = st.text_input(
             "Titre PDF Observations",
-            value=f"Suivi des enseignements — Observations ({CFG['dept_code']})",
+            value=f"Suivi des enseignements â€” Observations ({CFG['dept_code']})",
             key="pdf_obs_title"
         )
 
-        if st.button("Générer le PDF Observations", key="btn_pdf_obs"):
+        if st.button("GÃ©nÃ©rer le PDF Observations", key="btn_pdf_obs"):
             pdf_obs = build_pdf_observations_report(
                 df=filtered[
-                    ["Classe","Semestre","Type","Matière","Responsable","VHP","VHR","Écart","Taux","Statut_auto","Observations"]
+                    ["Classe","Semestre","Type","MatiÃ¨re","Responsable","VHP","VHR","Ã‰cart","Taux","Statut_auto","Observations"]
                 ].copy(),
                 title=pdf_obs_title,
                 mois_couverts=mois_couverts,
@@ -3161,7 +3162,7 @@ with tab_export:
             )
 
             st.download_button(
-                "⬇️ Télécharger PDF Observations",
+                "â¬‡ï¸ TÃ©lÃ©charger PDF Observations",
                 data=pdf_obs,
                 file_name=f"{export_prefix}_observations.pdf",
                 mime="application/pdf",
@@ -3171,21 +3172,21 @@ with tab_export:
         st.divider()
 
         # =========================================================
-        # OPENAI RESUME — TELECHARGEABLE (SEULE MODIF)
+        # OPENAI RESUME â€” TELECHARGEABLE (SEULE MODIF)
         # =========================================================
-        st.subheader("🧠 Résumé IA — Observations")
+        st.subheader("ðŸ§  RÃ©sumÃ© IA â€” Observations")
 
         if not st.session_state.get("is_admin", False):
-            st.info("🔒 Réservé Admin")
+            st.info("ðŸ”’ RÃ©servÃ© Admin")
         else:
 
             max_lines_llm = st.slider(
-                "Nombre max observations envoyées à l'IA",
+                "Nombre max observations envoyÃ©es Ã  l'IA",
                 50, 800, 300, 50,
                 key="slider_ai"
             )
 
-            if st.button("🧠 Générer résumé IA", key="btn_ai_obs"):
+            if st.button("ðŸ§  GÃ©nÃ©rer rÃ©sumÃ© IA", key="btn_ai_obs"):
                 try:
                     with st.spinner("Analyse IA en cours..."):
                         st.session_state["obs_ai_md"] = summarize_observations_with_openai(
@@ -3208,7 +3209,7 @@ with tab_export:
                 md_bytes = st.session_state["obs_ai_md"].encode("utf-8")
 
                 st.download_button(
-                    "⬇️ Télécharger résumé IA (.md)",
+                    "â¬‡ï¸ TÃ©lÃ©charger rÃ©sumÃ© IA (.md)",
                     data=md_bytes,
                     file_name=f"{export_prefix}_resume_IA_{mois_min}_{mois_max}.md",
                     mime="text/markdown",
@@ -3216,7 +3217,7 @@ with tab_export:
                 )
 
                 st.download_button(
-                    "⬇️ Télécharger résumé IA (.txt)",
+                    "â¬‡ï¸ TÃ©lÃ©charger rÃ©sumÃ© IA (.txt)",
                     data=md_bytes,
                     file_name=f"{export_prefix}_resume_IA_{mois_min}_{mois_max}.txt",
                     mime="text/plain",
@@ -3226,57 +3227,57 @@ with tab_export:
 
 
     # =========================================================
-    # 📩 ENVOI AU DG — avec Excel + PDF en pièces jointes
+    # ðŸ“© ENVOI AU DG â€” avec Excel + PDF en piÃ¨ces jointes
     # =========================================================
     st.divider()
-    st.subheader("📩 Envoyer au DG avec rapports en pièces jointes")
+    st.subheader("ðŸ“© Envoyer au DG avec rapports en piÃ¨ces jointes")
 
     if not st.session_state.get("is_admin", False):
-        st.info("🔒 Réservé Admin — entrez le PIN dans la sidebar.")
+        st.info("ðŸ”’ RÃ©servÃ© Admin â€” entrez le PIN dans la sidebar.")
     elif not recipients:
-        st.warning("Aucun destinataire configuré (DG_EMAILS dans st.secrets).")
+        st.warning("Aucun destinataire configurÃ© (DG_EMAILS dans st.secrets).")
     else:
         st.write(f"**Destinataires :** {', '.join(recipients)}")
-        st.caption("L'email inclura le rapport Excel consolidé et le rapport PDF mensuel en pièces jointes.")
+        st.caption("L'email inclura le rapport Excel consolidÃ© et le rapport PDF mensuel en piÃ¨ces jointes.")
 
-        if st.button("📩 Envoyer le rapport au DG (Excel + PDF + Observations joints)", key="btn_send_dg"):
+        if st.button("ðŸ“© Envoyer le rapport au DG (Excel + PDF + Observations joints)", key="btn_send_dg"):
             if lock_is_active(month_key):
-                st.warning("Un envoi est déjà en cours (anti double-envoi).")
+                st.warning("Un envoi est dÃ©jÃ  en cours (anti double-envoi).")
             else:
-                with st.spinner("Génération des rapports et envoi en cours..."):
+                with st.spinner("GÃ©nÃ©ration des rapports et envoi en cours..."):
                     try:
                         _logo_bytes = logo.getvalue() if logo else None
 
-                        # — Excel consolidé —
+                        # â€” Excel consolidÃ© â€”
                         _export_df = filtered[
-                            ["Classe", "Semestre", "Matière", "Début prévu", "Fin prévue", "VHP"]
+                            ["Classe", "Semestre", "MatiÃ¨re", "DÃ©but prÃ©vu", "Fin prÃ©vue", "VHP"]
                             + MOIS_COLS
-                            + ["VHR", "Écart", "Taux", "Statut_auto", "Observations"]
+                            + ["VHR", "Ã‰cart", "Taux", "Statut_auto", "Observations"]
                         ].copy()
                         _export_df["Taux"] = (_export_df["Taux"] * 100).round(2)
 
                         _synth_class = filtered.groupby("Classe").agg(
-                            Matieres=("Matière", "count"),
+                            Matieres=("MatiÃ¨re", "count"),
                             Taux_moy=("Taux", "mean"),
                             VHP_total=("VHP", "sum"),
                             VHR_total=("VHR", "sum"),
-                            Retard_h=("Écart", lambda s: float(s[s < 0].sum())),
+                            Retard_h=("Ã‰cart", lambda s: float(s[s < 0].sum())),
                         ).reset_index()
                         _synth_class["Taux_moy"] = (_synth_class["Taux_moy"] * 100).round(2)
 
                         _xlsx = df_to_excel_bytes({
-                            "Consolidé": _export_df,
+                            "ConsolidÃ©": _export_df,
                             "Synthese_Classes": _synth_class,
                         })
 
-                        # — PDF rapport mensuel —
+                        # â€” PDF rapport mensuel â€”
                         _pdf = build_pdf_report(
                             df=filtered[
-                                ["Classe", "Semestre", "Matière", "Début prévu", "Fin prévue", "VHP"]
+                                ["Classe", "Semestre", "MatiÃ¨re", "DÃ©but prÃ©vu", "Fin prÃ©vue", "VHP"]
                                 + mois_couverts
-                                + ["VHR", "Écart", "Taux", "Statut_auto", "Observations"]
+                                + ["VHR", "Ã‰cart", "Taux", "Statut_auto", "Observations"]
                             ].copy(),
-                            title=f"Rapport mensuel — Suivi des enseignements ({CFG['dept_code']}) | {today.strftime('%m/%Y')}",
+                            title=f"Rapport mensuel â€” Suivi des enseignements ({CFG['dept_code']}) | {today.strftime('%m/%Y')}",
                             mois_couverts=mois_couverts,
                             thresholds=thresholds,
                             logo_bytes=_logo_bytes,
@@ -3286,13 +3287,13 @@ with tab_export:
                             institution=CFG["institution"],
                         )
 
-                        # — PDF observations —
+                        # â€” PDF observations â€”
                         _pdf_obs = build_pdf_observations_report(
                             df=filtered[
-                                ["Classe", "Semestre", "Type", "Matière", "Responsable",
-                                 "VHP", "VHR", "Écart", "Taux", "Statut_auto", "Observations"]
+                                ["Classe", "Semestre", "Type", "MatiÃ¨re", "Responsable",
+                                 "VHP", "VHR", "Ã‰cart", "Taux", "Statut_auto", "Observations"]
                             ].copy(),
-                            title=f"Suivi des enseignements — Observations ({CFG['dept_code']}) | {today.strftime('%m/%Y')}",
+                            title=f"Suivi des enseignements â€” Observations ({CFG['dept_code']}) | {today.strftime('%m/%Y')}",
                             mois_couverts=mois_couverts,
                             logo_bytes=_logo_bytes,
                             author_name=CFG["author_name"],
@@ -3320,10 +3321,11 @@ with tab_export:
                         ]
 
                         do_send(attachments=_attachments)
-                        st.success(f"✅ Email envoyé à {', '.join(recipients)} avec 3 fichiers joints (Excel + PDF rapport + PDF observations).")
+                        st.success(f"âœ… Email envoyÃ© Ã  {', '.join(recipients)} avec 3 fichiers joints (Excel + PDF rapport + PDF observations).")
                     except Exception as e:
                         st.error(f"Erreur envoi : {e}")
 
 
 
-st.caption("✅ Astuce : standardise les colonnes sur toutes les feuilles. L’app calcule automatiquement VHR/Écart/Taux/Statut selon la période sélectionnée.")
+st.caption("âœ… Astuce : standardise les colonnes sur toutes les feuilles. Lâ€™app calcule automatiquement VHR/Ã‰cart/Taux/Statut selon la pÃ©riode sÃ©lectionnÃ©e.")
+

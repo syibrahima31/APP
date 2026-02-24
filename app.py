@@ -2303,7 +2303,6 @@ with tab_overview:
     nb_enc  = int((filtered["Statut_auto"] == "En cours").sum())
     nb_nd   = int((filtered["Statut_auto"] == "Non dÃ©marrÃ©").sum())
     retard_total = float(filtered.loc[filtered["Écart"] < 0, "Écart"].sum()) if total else 0.0
-    retard_total_abs = abs(retard_total)
 
     # ----- KPI en cartes HTML -----
     retard_class = "kpi-good"
@@ -2336,8 +2335,8 @@ with tab_overview:
           </div>
 
           <div class="kpi {retard_class}">
-            <div class="kpi-title">Charge à rattraper (h)</div>
-            <div class="kpi-value">{retard_total_abs:.0f}</div>
+            <div class="kpi-title">Retard cumulé (h)</div>
+            <div class="kpi-value">{retard_total:.0f}</div>
           </div>
         </div>
         """,

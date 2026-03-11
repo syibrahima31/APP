@@ -5,20 +5,11 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from db.database import SessionLocal, init_db
+from db.database import get_db
 from db.models import Classe, Enseignement, Pointage
 from backend.schemas.enseignement import EnseignementCreate, EnseignementRead, EnseignementUpdate
 
 router = APIRouter()
-
-
-def get_db():
-    init_db()
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 def _compute_vhr(ens: Enseignement) -> float:

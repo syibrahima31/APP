@@ -29,8 +29,10 @@ engine = create_engine(
     _db_url,
     connect_args={"check_same_thread": False} if _is_sqlite else {},
     echo=False,
-    pool_pre_ping=True,             # Détecte les connexions mortes (PostgreSQL)
-    pool_recycle=3600,              # Recycler les connexions toutes les heures
+    pool_pre_ping=not _is_sqlite,   # Inutile pour SQLite
+    pool_recycle=3600,
+    pool_size=10,                   # Pool de connexions réutilisées
+    max_overflow=20,
 )
 
 # Active les foreign keys sur SQLite (désactivées par défaut)

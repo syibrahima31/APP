@@ -138,6 +138,7 @@ class Enseignement(Base):
     enseignant      = relationship("Enseignant", back_populates="enseignements")
     pointages       = relationship("Pointage", back_populates="enseignement", cascade="all, delete-orphan")
     alertes         = relationship("Alerte", back_populates="enseignement", cascade="all, delete-orphan")
+    seances         = relationship("SeancePlanifiee", back_populates="enseignement", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Enseignement {self.matiere} (classe_id={self.classe_id})>"
@@ -158,6 +159,7 @@ class Pointage(Base):
     created_at      = Column(DateTime, default=datetime.utcnow)
 
     enseignement    = relationship("Enseignement", back_populates="pointages")
+    seance          = relationship("SeancePlanifiee", back_populates="pointage", uselist=False)
 
     __table_args__ = (
         Index("idx_pointage_ens_date", "enseignement_id", "date"),
@@ -165,6 +167,35 @@ class Pointage(Base):
 
     def __repr__(self):
         return f"<Pointage {self.date} {self.heures}h>"
+
+
+class SeancePlanifiee(Base):
+    """Séance de cours programmée (planning prévisionnel)."""
+    __tablename__ = "seances_planifiees"
+
+    id              = Column(Integer, primary_key=True, autoincrement=True)
+    enseignement_id = Column(Integer, ForeignKey("enseignements.id", ondelete="CASCADE"), nullable=False, index=True)
+    date_prevue     = Column(Date, nullable=False, index=True)
+    heure_debut     = Column(String(5), default="08:00")   # HH:MM
+    heure_fin       = Column(String(5), default="10:00")   # HH:MM
+    nb_heures       = Column(Float, nullable=False, default=2.0)
+    salle           = Column(String(80), default="")
+    statut          = Column(String(20), default="planifie")  # planifie | effectue | annule
+    pointage_id     = Column(Integer, ForeignKey("pointages.id", ondelete="SET NULL"), nullable=True)
+    note            = Column(Text, default="")
+    created_by      = Column(String(100), default="")
+    created_at      = Column(DateTime, default=datetime.utcnow)
+
+    enseignement    = relationship("Enseignement", back_populates="seances")
+    pointage        = relationship("Pointage", back_populates="seance", foreign_keys=[pointage_id])
+
+    __table_args__ = (
+        Index("idx_seance_date", "date_prevue", "statut"),
+        Index("idx_seance_ens", "enseignement_id", "date_prevue"),
+    )
+
+    def __repr__(self):
+        return f"<SeancePlanifiee {self.date_prevue} {self.heure_debut}-{self.heure_fin}>"
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -208,3 +208,42 @@ def import_excel_url(url: str, dept: str, annee: str = None, clear: bool = False
     if annee:
         data_form["annee"] = annee
     return _post("/api/import/excel-url", files=None, data_form=data_form)
+
+
+# ── Planning / Séances ────────────────────────────────────────────────────
+
+def get_seances(dept: str, classe_id: int = None, enseignement_id: int = None,
+                date_debut: str = None, date_fin: str = None, statut: str = None) -> list:
+    params = {"dept": dept}
+    if classe_id: params["classe_id"] = classe_id
+    if enseignement_id: params["enseignement_id"] = enseignement_id
+    if date_debut: params["date_debut"] = date_debut
+    if date_fin: params["date_fin"] = date_fin
+    if statut: params["statut"] = statut
+    return _get("/api/seances/", params)
+
+
+def get_seances_semaine(dept: str, lundi: str = None) -> list:
+    params = {"dept": dept}
+    if lundi: params["lundi"] = lundi
+    return _get("/api/seances/semaine", params)
+
+
+def create_seance(payload: dict) -> dict:
+    return _post("/api/seances/", payload)
+
+
+def pointer_seance(seance_id: int, saisi_par: str = "", note: str = "",
+                   nb_heures: float = None) -> dict:
+    data = {"saisi_par": saisi_par, "note": note}
+    if nb_heures is not None:
+        data["nb_heures"] = nb_heures
+    return _post(f"/api/seances/{seance_id}/pointer", data)
+
+
+def annuler_seance(seance_id: int) -> dict:
+    return _post(f"/api/seances/{seance_id}/annuler", {})
+
+
+def delete_seance(seance_id: int) -> None:
+    _delete(f"/api/seances/{seance_id}")

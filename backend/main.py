@@ -15,7 +15,7 @@ from backend.core.config import settings
 from db.database import init_db
 from backend.routers import classes, enseignements, pointage
 from backend.routers import auth as auth_router
-from backend.routers import analytics, alertes as alertes_router, excel_import
+from backend.routers import analytics, alertes as alertes_router, excel_import, planning
 
 
 @asynccontextmanager
@@ -68,6 +68,7 @@ app.include_router(pointage.router,          prefix="/api/pointages",     tags=[
 app.include_router(analytics.router,         prefix="/api/analytics",     tags=["Analytics"])
 app.include_router(alertes_router.router,    prefix="/api/alertes",       tags=["Alertes"])
 app.include_router(excel_import.router,      prefix="/api/import",        tags=["Import Excel"])
+app.include_router(planning.router,          prefix="/api/seances",       tags=["Planning"])
 
 
 @app.get("/api/health", tags=["Sante"])

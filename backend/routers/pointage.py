@@ -6,7 +6,7 @@ from collections import defaultdict
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from db.database import SessionLocal, init_db
+from db.database import get_db
 from db.models import Classe, Enseignement, Pointage
 from backend.schemas.pointage import PointageCreate, PointageRead, PointageResume
 
@@ -19,15 +19,6 @@ _MOIS_ACADEMIQUE = {
     4: "avril", 5: "mai", 6: "juin",
     7: "juil", 8: "aout",
 }
-
-
-def get_db():
-    init_db()
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.get("/", response_model=List[PointageRead])

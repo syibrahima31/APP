@@ -69,6 +69,7 @@ from utils.data_pipeline import (
     fetch_excel_if_changed,
     fetch_headers,
     load_excel_all_sheets,
+    load_from_db,
     make_long,
     normalize_semestre_value,
 )
@@ -1758,7 +1759,7 @@ with st.sidebar:
     # =========================================================
     sidebar_card("Import & Paramètres")
 
-    import_mode = st.radio("Mode d'import", ["URL (auto)", "Upload (manuel)"], index=0)
+    import_mode = st.radio("Mode d'import", ["Base de données", "URL (auto)", "Upload (manuel)"], index=0)
 
     file_bytes = None
     source_label = None
@@ -1785,7 +1786,12 @@ with st.sidebar:
         st.rerun()
 
 
-    if import_mode == "URL (auto)":
+    if import_mode == "Base de données":
+        dept_code = CFG.get("dept_code", "IAID")
+        st.caption(f"Département actif : **{dept_code}** — données chargées depuis la base de données.")
+        source_label = f"Base de données ({dept_code})"
+
+    elif import_mode == "URL (auto)":
         st.caption("Recommandé Streamlit Cloud : lien direct vers un fichier .xlsx")
         default_url = str(safe_secret(CFG["secrets"]["excel_url"], ""))
         url = st.text_input("URL du fichier Excel (.xlsx)", value=default_url)
@@ -1807,12 +1813,8 @@ with st.sidebar:
                 digest = hashlib.md5(file_bytes).hexdigest()[:10]
                 st.caption(f"📦 URL: {len(file_bytes)/1024:.1f} KB | md5: {digest} | tick={tick}")
 
-
             except Exception as e:
                 st.error(f"Erreur téléchargement: {e}")
-
-
-
 
     else:
         uploaded = st.file_uploader("Importer le fichier Excel (.xlsx)", type=["xlsx"])
@@ -2149,15 +2151,18 @@ unsafe_allow_html=True
 thresholds = {"taux_vert": taux_vert, "taux_orange": taux_orange, "ecart_critique": ecart_critique}
 
 
-if file_bytes is None:
-    st.info("Fournis une source (URL auto via Secrets ou Upload manuel).")
-    st.stop()
-
-
+if import_mode == "Base de données":
+    dept_code = CFG.get("dept_code", "IAID")
+    cache_key = str(int(time.time() // 60))  # invalide toutes les minutes
+    df, quality = load_from_db(dept_code, _cache_key=cache_key)
+    source_label = source_label or f"Base de données ({dept_code})"
+else:
+    if file_bytes is None:
+        st.info("Fournis une source (URL auto via Secrets ou Upload manuel).")
+        st.stop()
+    df, quality = load_excel_all_sheets(file_bytes)
 
 st.caption(f"Source active : **{source_label}**")
-
-df, quality = load_excel_all_sheets(file_bytes)
 
 
 def _ensure_column_aliases(d: pd.DataFrame) -> pd.DataFrame:

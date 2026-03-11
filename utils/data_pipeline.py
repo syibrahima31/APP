@@ -250,6 +250,17 @@ def unpivot_months(df: pd.DataFrame) -> pd.DataFrame:
     return long
 
 
+@st.cache_data(show_spinner=False, max_entries=10)
+def load_from_db(dept_code: str, _cache_key: str = "") -> Tuple[pd.DataFrame, Dict[str, List[str]]]:
+    """
+    Charge les données depuis la base de données SQLite/PostgreSQL.
+    Retourne (df, quality_issues) — même format que load_excel_all_sheets().
+    _cache_key permet de forcer le rechargement (ex: timestamp).
+    """
+    from db.crud import load_df_from_db
+    return load_df_from_db(dept_code)
+
+
 @st.cache_data(show_spinner=False, max_entries=5)
 def df_to_excel_bytes(sheets: Dict[str, pd.DataFrame]) -> bytes:
     output = io.BytesIO()
